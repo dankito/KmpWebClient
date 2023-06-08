@@ -5,6 +5,8 @@ plugins {
 
 
 dependencies {
+    implementation(project(":kmp-web-client"))
+
     testImplementation(kotlin("test"))
 }
 

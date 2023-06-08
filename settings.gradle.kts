@@ -9,7 +9,7 @@ pluginManagement {
 rootProject.name = "KmpWebClient"
 
 
-include(":library")
+include(":kmp-web-client")
 include(":android")
 include(":jvm")
 
