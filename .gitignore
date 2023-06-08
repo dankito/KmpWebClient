@@ -1,0 +1,15 @@
+.idea/
+*.iml
+
+**/build
+**/out
+
+.gradle
+
+/local.properties
+
+.DS_Store
+.externalNativeBuild
+
+/data/
+**/*.log
