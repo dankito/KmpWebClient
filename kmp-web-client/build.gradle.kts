@@ -1,9 +1,16 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+
 plugins {
     kotlin("multiplatform")
+    id("com.android.library")
 }
 
 
+@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
+    // Enable the default target hierarchy:
+    targetHierarchy.default()
+
     jvm {
         jvmToolchain(8)
 //        withJava() // due to a bug in IntelliJ currently does not work
@@ -12,61 +19,52 @@ kotlin {
         }
     }
 
-    js(BOTH) {
+    android {
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
+    }
+
+    js(IR) {
+        moduleName = "kmpwebclient"
+//        binaries.executable()
+
         browser {
             commonWebpackConfig {
                 cssSupport {
                     enabled.set(true)
                 }
             }
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                    useFirefoxHeadless()
+                }
+            }
         }
+
+        nodejs()
     }
 
-    val hostOs = System.getProperty("os.name")
-    val isMingwX64 = hostOs.startsWith("Windows")
-    val nativeTarget = when {
-        hostOs == "Mac OS X" -> macosX64("native")
-        hostOs == "Linux" -> linuxX64("native")
-        isMingwX64 -> mingwX64("native")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
 
-    
-    linuxX64 {
-        binaries {
-            executable {
-                entryPoint = "main"
-            }
-        }
-    }
-    mingwX64 {
-        binaries {
-            executable {
-                entryPoint = "main"
-            }
-        }
-    }
-    macosX64 {
-        binaries {
-            executable {
-                entryPoint = "main"
-            }
-        }
-    }
-    iosX64 {
+    linuxX64()
+    mingwX64()
+
+
+    ios {
         binaries {
             framework {
-                baseName = "library"
+                baseName = "kmp-web-client"
             }
         }
     }
-    iosArm64 {
-        binaries {
-            framework {
-                baseName = "library"
-            }
-        }
-    }
+    iosSimulatorArm64()
+    macosX64()
+    macosArm64()
+    watchos()
+    watchosSimulatorArm64()
+    tvos()
+    tvosSimulatorArm64()
 
 
     val coroutinesVersion: String by project
@@ -98,37 +96,68 @@ kotlin {
         }
         val jvmTest by getting
 
+        val androidMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-android:$ktorVersion")
+            }
+        }
+
         val jsMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-js:$ktorVersion")
             }
         }
-        val jsTest by getting
 
-        val nativeMain by getting {
+        val linuxMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
             }
         }
-        val nativeTest by getting
 
-        val linuxX64Main by getting
-        val linuxX64Test by getting
-
-        val mingwX64Main by getting {
+        val mingwMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
             }
         }
-        val mingwX64Test by getting
 
-        val macosX64Main by getting
-        val macosX64Test by getting
+        val appleMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+            }
+        }
+    }
+}
 
-        val iosX64Main by getting
-        val iosX64Test by getting
 
-        val iosArm64Main by getting
-        val iosArm64Test by getting
+android {
+    namespace = "net.dankito.web.client"
+
+    compileSdk = 33
+    defaultConfig {
+        minSdk = 21
+        targetSdk = 33
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        getByName("main") {
+            manifest.srcFile("src/androidMain/AndroidManifest.xml")
+        }
+    }
+
+    lint {
+        abortOnError = false
+    }
+
+    testOptions {
+        unitTests {
+            // Otherwise we get this exception in tests:
+            // Method e in android.util.Log not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+            isReturnDefaultValues = true
+        }
     }
 }
