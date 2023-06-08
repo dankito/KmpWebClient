@@ -5,7 +5,7 @@ plugins {
 
 kotlin {
     jvm {
-        jvmToolchain(11)
+        jvmToolchain(8)
 //        withJava() // due to a bug in IntelliJ currently does not work
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -67,27 +67,67 @@ kotlin {
             }
         }
     }
+
+
+    val coroutinesVersion: String by project
+    val ktorVersion: String by project
+
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-auth:$ktorVersion")
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
             }
         }
-        val jvmMain by getting
+
+        val jvmMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+            }
+        }
         val jvmTest by getting
-        val jsMain by getting
+
+        val jsMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-js:$ktorVersion")
+            }
+        }
         val jsTest by getting
-        val nativeMain by getting
+
+        val nativeMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+            }
+        }
         val nativeTest by getting
+
         val linuxX64Main by getting
         val linuxX64Test by getting
-        val mingwX64Main by getting
+
+        val mingwX64Main by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
+            }
+        }
         val mingwX64Test by getting
+
         val macosX64Main by getting
         val macosX64Test by getting
+
         val iosX64Main by getting
         val iosX64Test by getting
+
         val iosArm64Main by getting
         val iosArm64Test by getting
     }

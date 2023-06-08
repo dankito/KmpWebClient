@@ -12,7 +12,7 @@ buildscript {
 
 
 allprojects {
-    group = "net.dankito.web"
+    group = "net.dankito.web.client"
     version = "1.0.0-SNAPSHOT"
 
     repositories {
