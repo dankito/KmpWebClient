@@ -3,8 +3,6 @@ plugins {
     application
 }
 
-group = "me.ganymed"
-version = "1.0-SNAPSHOT"
 
 dependencies {
     testImplementation(kotlin("test"))

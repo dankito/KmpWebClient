@@ -17,5 +17,6 @@ allprojects {
 
     repositories {
         mavenCentral()
+        google()
     }
 }

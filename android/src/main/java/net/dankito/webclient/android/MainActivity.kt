@@ -1,4 +1,4 @@
-package me.ganymed.android
+package net.dankito.webclient.android
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

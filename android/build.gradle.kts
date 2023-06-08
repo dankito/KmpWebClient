@@ -3,12 +3,6 @@ plugins {
     kotlin("android")
 }
 
-group = "me.ganymed"
-version = "1.0-SNAPSHOT"
-
-repositories {
-    google()
-}
 
 dependencies {
     implementation("com.google.android.material:material:1.5.0")
@@ -17,10 +11,10 @@ dependencies {
 }
 
 android {
-    namespace = "me.ganymed.android"
+    namespace = "net.dankito.webclient.android"
     compileSdk = 32
     defaultConfig {
-        applicationId = "me.ganymed.android"
+        applicationId = "net.dankito.webclient.android"
         minSdk = 24
         targetSdk = 32
         versionCode = 1
