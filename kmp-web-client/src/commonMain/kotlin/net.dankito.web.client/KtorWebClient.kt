@@ -1,6 +1,6 @@
 package net.dankito.web.client
 
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -16,20 +16,34 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
-open class KtorWebClient(protected open val baseUrl: String? = null) : WebClient {
+open class KtorWebClient(
+    protected open val baseUrl: String? = null,
+    /**
+     * Be aware the following engines do not support disabling certificate check:
+     * - JavaScript HttpClient
+     * - CIO on native platforms
+     * - WinHttp
+     */
+    ignoreCertificateErrors: Boolean = false
+) : WebClient {
 
     protected open val json = Json {
         ignoreUnknownKeys = true
     }
 
-    protected open val client = HttpClient {
-        install(HttpTimeout)
-        install(ContentNegotiation) {
-            json()
-        }
-        defaultRequest {
-            baseUrl?.let {
-                url(baseUrl)
+    protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this) }
+        ?: HttpClient { configureClient(this) }
+
+    private fun configureClient(config: HttpClientConfig<*>) {
+        config.apply {
+            install(HttpTimeout)
+            install(ContentNegotiation) {
+                json()
+            }
+            defaultRequest {
+                baseUrl?.let {
+                    url(baseUrl)
+                }
             }
         }
     }

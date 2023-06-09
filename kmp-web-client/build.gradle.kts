@@ -12,7 +12,7 @@ kotlin {
     targetHierarchy.default()
 
     jvm {
-        jvmToolchain(8)
+        jvmToolchain(11)
 //        withJava() // due to a bug in IntelliJ currently does not work
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -89,7 +89,23 @@ kotlin {
             }
         }
 
+
+        val javaCommonMain by creating {
+            dependsOn(commonMain)
+
+            dependencies {
+                compileOnly("io.ktor:ktor-client-cio:$ktorVersion")
+                compileOnly("io.ktor:ktor-client-okhttp:$ktorVersion")
+                compileOnly("io.ktor:ktor-client-apache:$ktorVersion")
+                compileOnly("io.ktor:ktor-client-java:$ktorVersion")
+                compileOnly("io.ktor:ktor-client-jetty:$ktorVersion")
+                compileOnly("io.ktor:ktor-client-android:$ktorVersion")
+            }
+        }
+
         val jvmMain by getting {
+            dependsOn(javaCommonMain)
+
             dependencies {
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
             }
@@ -97,8 +113,10 @@ kotlin {
         val jvmTest by getting
 
         val androidMain by getting {
+            dependsOn(javaCommonMain)
+
             dependencies {
-                implementation("io.ktor:ktor-client-android:$ktorVersion")
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
             }
         }
 
@@ -108,15 +126,26 @@ kotlin {
             }
         }
 
+        val nativeMain by getting {
+            dependencies {
+                // yes, i know, Kotlin/Native has no compileOnly, but we need this dependency to configure engine and to make intention clear
+                compileOnly("io.ktor:ktor-client-cio:$ktorVersion")
+            }
+        }
+
         val linuxMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                // yes, i know, Kotlin/Native has no compileOnly, but we need this dependency to configure engine and to make intention clear
+                compileOnly("io.ktor:ktor-client-curl:$ktorVersion")
             }
         }
 
         val mingwMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
+                // yes, i know, Kotlin/Native has no compileOnly, but we need this dependency to configure engine and to make intention clear
+                compileOnly("io.ktor:ktor-client-curl:$ktorVersion")
             }
         }
 
