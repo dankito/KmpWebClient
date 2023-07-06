@@ -7,6 +7,9 @@ plugins {
 dependencies {
     implementation(project(":kmp-web-client"))
 
+    implementation("net.codinux.log:kmp-log:1.1.2")
+    implementation("net.codinux.util:stopwatch:1.5.0")
+
     testImplementation(kotlin("test"))
 }
 
