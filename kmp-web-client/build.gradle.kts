@@ -190,3 +190,9 @@ android {
         }
     }
 }
+
+
+
+ext["customArtifactId"] = "kmp-web-client"
+
+apply(from = "../gradle/scripts/publish-dankito.gradle.kts")
