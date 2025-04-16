@@ -18,7 +18,7 @@ class KtorWebClientTest {
 
     @Test
     fun get() = runTest {
-        val response = underTest.getAsync<String>(Url)
+        val response = underTest.get<String>(Url)
 
         assertTrue(response.successful)
         assertEquals(200, response.statusCode)
@@ -27,7 +27,7 @@ class KtorWebClientTest {
 
     @Test
     fun getWithParameters() = runTest {
-        val response = underTest.getAsync(RequestParameters(Url, String::class))
+        val response = underTest.get(RequestParameters(Url, String::class))
 
         assertTrue(response.successful)
         assertEquals(200, response.statusCode)
@@ -37,7 +37,7 @@ class KtorWebClientTest {
 
     @Test
     fun head() = runTest {
-        val response = underTest.headAsync(Url)
+        val response = underTest.head(Url)
 
         assertTrue(response.successful)
         assertEquals(200, response.statusCode)
@@ -46,7 +46,7 @@ class KtorWebClientTest {
 
     @Test
     fun headWithParameters() = runTest {
-        val response = underTest.headAsync(RequestParameters(Url, Unit::class))
+        val response = underTest.head(RequestParameters(Url, Unit::class))
 
         assertTrue(response.successful)
         assertEquals(200, response.statusCode)

@@ -49,19 +49,19 @@ open class KtorWebClient(
     }
 
 
-    override suspend fun <T : Any> getAsync(parameters: RequestParameters<T>) =
+    override suspend fun <T : Any> get(parameters: RequestParameters<T>) =
         makeRequest(HttpMethod.Get, parameters)
 
-    override suspend fun headAsync(parameters: RequestParameters<Unit>) =
+    override suspend fun head(parameters: RequestParameters<Unit>) =
         makeRequest(HttpMethod.Head, parameters)
 
-    override suspend fun <T : Any> postAsync(parameters: RequestParameters<T>) =
+    override suspend fun <T : Any> post(parameters: RequestParameters<T>) =
         makeRequest(HttpMethod.Post, parameters)
 
-    override suspend fun <T : Any> putAsync(parameters: RequestParameters<T>) =
+    override suspend fun <T : Any> put(parameters: RequestParameters<T>) =
         makeRequest(HttpMethod.Put, parameters)
 
-    override suspend fun <T : Any> deleteAsync(parameters: RequestParameters<T>) =
+    override suspend fun <T : Any> delete(parameters: RequestParameters<T>) =
         makeRequest(HttpMethod.Delete, parameters)
 
 
