@@ -4,8 +4,16 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
     }
-    
+
+
+    val kotlinVersion: String by settings
+
+    plugins {
+        kotlin("multiplatform") version kotlinVersion apply false
+    }
 }
+
+
 rootProject.name = "KmpWebClient"
 
 
