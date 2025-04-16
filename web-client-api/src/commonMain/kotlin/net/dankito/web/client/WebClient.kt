@@ -12,12 +12,17 @@ interface WebClient {
 
     suspend fun <T : Any> delete(parameters: RequestParameters<T>): WebClientResponse<T>
 
+    /**
+     * To support custom HTTP methods like PROPFIND and REPORT (WebDAV).
+     */
+    suspend fun <T : Any> custom(httpMethod: String, parameters: RequestParameters<T>): WebClientResponse<T>
+
 }
 
 
 suspend fun WebClient.head(url: String) = head(RequestParameters(url, Unit::class))
 
-suspend inline fun <reified T : Any> WebClient.get(url: String) = this@get.get(RequestParameters(url, T::class))
+suspend inline fun <reified T : Any> WebClient.get(url: String) = get(RequestParameters(url, T::class))
 
 suspend inline fun <reified T : Any> WebClient.post(url: String, body: String, contentType: String = RequestParameters.DefaultContentType) =
     post(RequestParameters(url, T::class, body, contentType))
@@ -26,3 +31,5 @@ suspend inline fun <reified T : Any> WebClient.put(url: String, body: String, co
     put(RequestParameters(url, T::class, body, contentType))
 
 suspend inline fun <reified T : Any> WebClient.delete(url: String) = delete(RequestParameters(url, T::class))
+
+suspend inline fun <reified T : Any> WebClient.custom(httpMethod: String, url: String) = custom(httpMethod, RequestParameters(url, T::class))
