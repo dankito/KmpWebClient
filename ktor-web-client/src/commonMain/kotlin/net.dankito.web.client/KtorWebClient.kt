@@ -20,16 +20,15 @@ import net.codinux.log.logger
 import net.dankito.web.client.auth.*
 
 open class KtorWebClient(
+    protected val config: ClientConfig = ClientConfig(),
     /**
      * If you want to create the HttpClient instance by yourself, e.g. you want to use Curl on Windows,
      * CIO on Windows or Linux, then provide a custom HttpClient creator function here.
      */
     customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
-    protected val config: ClientConfig = ClientConfig()
 ) : WebClient {
 
     constructor(
-        customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
         baseUrl: String? = null,
         authentication: Authentication? = null,
         /**
@@ -42,7 +41,8 @@ open class KtorWebClient(
         customClientConfig: ((HttpClientConfig<*>, config: ClientConfig) -> Unit)? = null,
         defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
         defaultContentType: String = ContentTypes.JSON,
-    ) : this(customClientCreator, ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType))
+        customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
+    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType), customClientCreator)
 
 
     companion object {
