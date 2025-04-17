@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 
 plugins {
     kotlin("multiplatform")
@@ -45,6 +47,18 @@ kotlin {
             testTask {
                 useMocha {
                     timeout = "20s" // Mocha times out after 2 s, which is too short for some tests
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                    useFirefoxHeadless()
                 }
             }
         }
@@ -117,6 +131,12 @@ kotlin {
         val jvmTest by getting
 
         val jsMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-js:$ktorVersion")
+            }
+        }
+
+        val wasmJsMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-js:$ktorVersion")
             }

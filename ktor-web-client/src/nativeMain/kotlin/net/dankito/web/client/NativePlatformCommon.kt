@@ -1,7 +1,7 @@
 package net.dankito.web.client
 
 import io.ktor.client.engine.*
-import io.ktor.util.*
+import io.ktor.utils.io.*
 
 object NativePlatformCommon {
 
