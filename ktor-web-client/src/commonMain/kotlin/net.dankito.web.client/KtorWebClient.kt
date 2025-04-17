@@ -20,10 +20,16 @@ import net.codinux.log.logger
 import net.dankito.web.client.auth.*
 
 open class KtorWebClient(
+    /**
+     * If you want to create the HttpClient instance by yourself, e.g. you want to use Curl on Windows,
+     * CIO on Windows or Linux, then provide a custom HttpClient creator function here.
+     */
+    customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
     protected val config: ClientConfig = ClientConfig()
 ) : WebClient {
 
     constructor(
+        customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
         baseUrl: String? = null,
         authentication: Authentication? = null,
         /**
@@ -35,7 +41,7 @@ open class KtorWebClient(
         ignoreCertificateErrors: Boolean = false,
         defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
         defaultContentType: String = ContentTypes.JSON,
-    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, defaultUserAgent, defaultContentType))
+    ) : this(customClientCreator, ClientConfig(baseUrl, authentication, ignoreCertificateErrors, defaultUserAgent, defaultContentType))
 
 
     companion object {
@@ -54,8 +60,11 @@ open class KtorWebClient(
 
     protected val log by logger()
 
-    protected open val client = Platform.createPlatformSpecificHttpClient(config.ignoreCertificateErrors) { configureClient(this, config) }
+
+    protected open val client = customClientCreator?.invoke(config) { configureClient(this, config) }
+        ?: Platform.createPlatformSpecificHttpClient(config.ignoreCertificateErrors) { configureClient(this, config) }
         ?: HttpClient { configureClient(this, config) }
+
 
     private fun configureClient(config: HttpClientConfig<*>, clientConfig: ClientConfig) {
         config.apply {
