@@ -18,8 +18,11 @@ object JavaPlatformCommon {
     }.toCollection(LinkedHashSet())
 
 
-    fun getFirstOfSupportedHttpClient(vararg supportedEngines: KtorEngine): KtorEngine? =
-        availableEngines.firstOrNull { supportedEngines.contains(it) }
+    fun createPlatformSpecificHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient? {
+        val preferredEngines = getPlatformSpecificPreferredEngines()
+
+        return createHttpClient(ignoreCertificateErrors, config, *preferredEngines.toTypedArray())
+    }
 
     fun createHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit, vararg supportedEngines: KtorEngine) =
         createHttpClient(getFirstOfSupportedHttpClient(*supportedEngines), ignoreCertificateErrors, config)
@@ -30,8 +33,32 @@ object JavaPlatformCommon {
             KtorEngine.CIO -> clientCreator.createCIOHttpClient(ignoreCertificateErrors, config)
             KtorEngine.Apache -> clientCreator.createApacheHttpClient(ignoreCertificateErrors, config)
             KtorEngine.Jetty -> clientCreator.createJettyHttpClient(ignoreCertificateErrors, config)
+            KtorEngine.Java -> clientCreator.createJavaHttpClient(ignoreCertificateErrors, config)
             KtorEngine.Android -> clientCreator.createAndroidHttpClient(ignoreCertificateErrors, config)
             else -> clientCreator.fallback(ignoreCertificateErrors, config)
+        }
+
+    fun getFirstOfSupportedHttpClient(vararg supportedEngines: KtorEngine): KtorEngine? =
+        availableEngines.firstOrNull { supportedEngines.contains(it) }
+
+
+    fun getPlatformSpecificPreferredEngines(): List<KtorEngine> =
+        if (isRunningOnAndroid) {
+            listOf(KtorEngine.Android, KtorEngine.CIO, KtorEngine.OkHttp)
+        } else {
+            listOf(KtorEngine.Java, KtorEngine.CIO, KtorEngine.OkHttp, KtorEngine.Apache, KtorEngine.Jetty)
+        }
+
+    val isRunningOnAndroid by lazy { isClassAvailable("android.content.Context") }
+
+    private fun isClassAvailable(qualifiedClassName: String): Boolean =
+        getClassOrNull(qualifiedClassName) != null
+
+    private fun getClassOrNull(qualifiedClassName: String): Class<*>? =
+        try {
+            Class.forName(qualifiedClassName)
+        } catch (ignored: Exception) {
+            null
         }
 
 }
