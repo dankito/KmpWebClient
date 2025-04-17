@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
 open class KtorWebClient(
-    protected open val baseUrl: String? = null,
+    baseUrl: String? = null,
     /**
      * Be aware the following engines do not support disabling certificate check:
      * - JavaScript HttpClient
@@ -31,10 +31,10 @@ open class KtorWebClient(
         ignoreUnknownKeys = true
     }
 
-    protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this) }
-        ?: HttpClient { configureClient(this) }
+    protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this, baseUrl) }
+        ?: HttpClient { configureClient(this, baseUrl) }
 
-    private fun configureClient(config: HttpClientConfig<*>) {
+    private fun configureClient(config: HttpClientConfig<*>, baseUrl: String?) {
         config.apply {
             install(HttpTimeout)
             install(ContentNegotiation) {
