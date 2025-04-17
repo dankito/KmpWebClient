@@ -147,6 +147,7 @@ open class KtorWebClient(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     @OptIn(InternalSerializationApi::class)
     protected open suspend fun <T : Any> decodeResponse(parameters: RequestParameters<T>, clientResponse: HttpResponse): T {
         val responseClass = parameters.responseClass
@@ -154,7 +155,10 @@ open class KtorWebClient(
         return if (responseClass == null || responseClass == Unit::class) {
             Unit as T
         } else if(responseClass == String::class) {
-            return clientResponse.bodyAsText() as T
+            clientResponse.bodyAsText() as T
+        } else if (responseClass == ByteArray::class) {
+            val bytes: ByteArray = clientResponse.body()
+            bytes as T
         } else {
             // TODO: add cache for Serializers
             // TODO: stream response (at least on JVM)
