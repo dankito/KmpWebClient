@@ -114,8 +114,15 @@ open class KtorWebClient(
                 this.userAgent(it)
             }
 
+            parameters.accept?.let {
+                this.accept(ContentType.parse(it))
+            }
+
             timeout {
-                connectTimeoutMillis = 10_000 // TODO: make configurable
+                // JS doesn't support connectTimeout and socketTimeout
+                connectTimeoutMillis = parameters.connectTimeoutMillis
+                socketTimeoutMillis = parameters.socketTimeoutMillis
+                requestTimeoutMillis = parameters.requestTimeoutMillis
             }
 
             parameters.body?.let {
