@@ -33,11 +33,6 @@ kotlin {
         binaries.library()
 
         browser {
-            commonWebpackConfig {
-                cssSupport {
-                    enabled.set(true)
-                }
-            }
             testTask {
                 useKarma {
                     useChromeHeadless()
