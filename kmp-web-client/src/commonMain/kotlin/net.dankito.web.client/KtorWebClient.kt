@@ -166,7 +166,12 @@ open class KtorWebClient(
         val cookies = httpResponse.setCookie().map { mapCookie(it) }
 
         return if (httpResponse.status.isSuccess()) {
-            WebClientResponse(true, url, responseDetails, body = decodeResponse(parameters, httpResponse))
+            try {
+                WebClientResponse(true, url, statusCode, headers, cookies, body = decodeResponse(parameters, httpResponse))
+            } catch (e: Throwable) {
+                log.error(e) { "Error while mapping response of: ${method.value} ${httpResponse.request.url}, ${httpResponse.headers.toMap()}" }
+                WebClientResponse(true, url, statusCode, headers, cookies, WebClientException(e.message ?: "", e, responseDetails))
+            }
         } else {
             val responseBody = httpResponse.bodyAsText()
 
