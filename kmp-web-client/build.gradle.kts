@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
     kotlin("multiplatform")
-    id("com.android.library")
 }
 
 
@@ -27,10 +26,6 @@ kotlin {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
-    }
-
-    androidTarget {
-
     }
 
     js(IR) {
@@ -126,14 +121,6 @@ kotlin {
         }
         val jvmTest by getting
 
-        val androidMain by getting {
-            dependsOn(javaCommonMain)
-
-            dependencies {
-                implementation("io.ktor:ktor-client-cio:$ktorVersion")
-            }
-        }
-
         val jsMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-js:$ktorVersion")
@@ -167,39 +154,6 @@ kotlin {
             dependencies {
                 implementation("io.ktor:ktor-client-darwin:$ktorVersion")
             }
-        }
-    }
-}
-
-
-android {
-    namespace = "net.dankito.web.client"
-
-    compileSdk = 33
-    defaultConfig {
-        minSdk = 21
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    sourceSets {
-        getByName("main") {
-            manifest.srcFile("src/androidMain/AndroidManifest.xml")
-        }
-    }
-
-    lint {
-        abortOnError = false
-    }
-
-    testOptions {
-        unitTests {
-            // Otherwise we get this exception in tests:
-            // Method e in android.util.Log not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
-            isReturnDefaultValues = true
         }
     }
 }
