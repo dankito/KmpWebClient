@@ -29,7 +29,7 @@ kotlin {
     }
 
     js(IR) {
-        moduleName = "kmpwebclient"
+        moduleName = "ktorwebclient"
         binaries.library()
 
         browser {
@@ -149,7 +149,7 @@ kotlin {
 
 
 
-ext["customArtifactId"] = "kmp-web-client"
+ext["customArtifactId"] = "ktor-web-client"
 
 if (File(projectDir, "../gradle/scripts/publish-dankito.gradle.kts").exists()) {
     apply(from = "../gradle/scripts/publish-dankito.gradle.kts")
