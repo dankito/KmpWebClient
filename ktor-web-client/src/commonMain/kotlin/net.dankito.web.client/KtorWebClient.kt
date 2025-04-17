@@ -199,7 +199,7 @@ open class KtorWebClient(
         val cookies = if (config.mapResponseCookies) httpResponse.setCookie().map { mapCookie(it) } else emptyList()
         val url = httpResponse.request.url.toString()
 
-        val responseDetails = ResponseDetails(httpResponse.status.value, httpResponse.status.description, httpResponse.requestTime, httpResponse.responseTime,
+        val responseDetails = ResponseDetails(httpResponse.status.value, httpResponse.status.description, httpResponse.requestTime.toHttpDate(), httpResponse.responseTime.toHttpDate(),
             httpResponse.version.name, headers, cookies, httpResponse.contentType()?.withoutParameters()?.toString(),
             httpResponse.contentLength(), httpResponse.charset()?.name)
 

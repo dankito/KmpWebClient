@@ -1,14 +1,12 @@
 package net.dankito.web.client
 
-import io.ktor.util.date.*
-
 class ResponseDetails(
     val statusCode: Int,
     val reasonPhrase: String,
 
-    // TODO: don't expose Ktor data types to the outside, make implementation agnostic
-    val requestTime: GMTDate,
-    val responseTime: GMTDate,
+    // TODO: map to platform independent Instance objects
+    val requestTime: String,
+    val responseTime: String,
 
     val httpProtocolVersion: String,
 
