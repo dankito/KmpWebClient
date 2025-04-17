@@ -42,7 +42,11 @@ open class KtorWebClient(
             }
             defaultRequest {
                 baseUrl?.let {
-                    url(baseUrl)
+                    if (baseUrl.endsWith("/")) { // add trailing slash, otherwise last path segment gets cut off when appending to relative url
+                        url(baseUrl)
+                    } else {
+                        url(baseUrl + "/")
+                    }
                 }
             }
         }
