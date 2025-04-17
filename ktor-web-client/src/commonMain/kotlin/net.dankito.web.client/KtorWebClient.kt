@@ -39,9 +39,10 @@ open class KtorWebClient(
          * - WinHttp
          */
         ignoreCertificateErrors: Boolean = false,
+        customClientConfig: ((HttpClientConfig<*>, config: ClientConfig) -> Unit)? = null,
         defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
         defaultContentType: String = ContentTypes.JSON,
-    ) : this(customClientCreator, ClientConfig(baseUrl, authentication, ignoreCertificateErrors, defaultUserAgent, defaultContentType))
+    ) : this(customClientCreator, ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType))
 
 
     companion object {
@@ -105,6 +106,9 @@ open class KtorWebClient(
                 }
             }
         }
+
+        // call at end so that it can overwrite settings we made
+        config.customClientConfig?.invoke(clientConfig, config)
     }
 
 

@@ -1,5 +1,6 @@
 package net.dankito.web.client
 
+import io.ktor.client.*
 import net.dankito.web.client.auth.Authentication
 
 open class ClientConfig(
@@ -13,6 +14,8 @@ open class ClientConfig(
      * - WinHttp
      */
     open val ignoreCertificateErrors: Boolean = false,
+
+    open val customClientConfig: ((HttpClientConfig<*>, config: ClientConfig) -> Unit)? = null,
 
     open val defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
     open val defaultContentType: String = ContentTypes.JSON,
