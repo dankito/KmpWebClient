@@ -11,8 +11,9 @@ kotlin {
     // Enable the default target hierarchy:
     targetHierarchy.default()
 
+    jvmToolchain(11)
+
     jvm {
-        jvmToolchain(11)
 //        withJava() // due to a bug in IntelliJ currently does not work
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -20,9 +21,7 @@ kotlin {
     }
 
     android {
-        compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
-        }
+
     }
 
     js(IR) {
@@ -70,6 +69,8 @@ kotlin {
     val coroutinesVersion: String by project
     val ktorVersion: String by project
 
+    val klfVersion: String by project
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -81,6 +82,8 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+
+                implementation("net.codinux.log:klf:$klfVersion")
             }
         }
         val commonTest by getting {
@@ -170,8 +173,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     sourceSets {
