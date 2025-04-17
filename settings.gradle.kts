@@ -20,7 +20,7 @@ plugins {
 rootProject.name = "KmpWebClient"
 
 
-include(":kmp-web-client")
+include("web-client-api")
+include(":ktor-web-client")
 include(":android")
 include(":jvm")
-include("web-client-api")
