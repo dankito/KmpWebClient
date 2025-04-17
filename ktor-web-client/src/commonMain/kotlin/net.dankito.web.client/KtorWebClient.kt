@@ -20,18 +20,23 @@ import net.codinux.log.logger
 import net.dankito.web.client.auth.*
 
 open class KtorWebClient(
-    baseUrl: String? = null,
-    authentication: Authentication? = null,
-    /**
-     * Be aware the following engines do not support disabling certificate check:
-     * - JavaScript HttpClient
-     * - CIO on native platforms
-     * - WinHttp
-     */
-    ignoreCertificateErrors: Boolean = false,
-    defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
-    protected val defaultContentType: String = ContentTypes.JSON,
+    protected val config: ClientConfig = ClientConfig()
 ) : WebClient {
+
+    constructor(
+        baseUrl: String? = null,
+        authentication: Authentication? = null,
+        /**
+         * Be aware the following engines do not support disabling certificate check:
+         * - JavaScript HttpClient
+         * - CIO on native platforms
+         * - WinHttp
+         */
+        ignoreCertificateErrors: Boolean = false,
+        defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
+        defaultContentType: String = ContentTypes.JSON,
+    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, defaultUserAgent, defaultContentType))
+
 
     protected open val json = Json {
         ignoreUnknownKeys = true
@@ -39,19 +44,19 @@ open class KtorWebClient(
 
     protected val log by logger()
 
-    protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this, baseUrl, authentication, defaultUserAgent) }
-        ?: HttpClient { configureClient(this, baseUrl, authentication, defaultUserAgent) }
+    protected open val client = Platform.createPlatformSpecificHttpClient(config.ignoreCertificateErrors) { configureClient(this, config) }
+        ?: HttpClient { configureClient(this, config) }
 
-    private fun configureClient(config: HttpClientConfig<*>, baseUrl: String?, authentication: Authentication?, defaultUserAgent: String?) {
+    private fun configureClient(config: HttpClientConfig<*>, clientConfig: ClientConfig) {
         config.apply {
             install(HttpTimeout)
             install(ContentNegotiation) {
                 json()
             }
 
-            if (authentication != null) {
+            if (clientConfig.authentication != null) {
                 install(Auth) {
-                    (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
+                    (clientConfig.authentication as? BasicAuthAuthentication)?.let { basicAuth ->
                         basic {
                             sendWithoutRequest { true }
                             credentials {
@@ -63,7 +68,7 @@ open class KtorWebClient(
             }
 
             defaultRequest {
-                baseUrl?.let {
+                clientConfig.baseUrl?.let { baseUrl ->
                     if (baseUrl.endsWith("/")) { // add trailing slash, otherwise last path segment gets cut off when appending to relative url
                         url(baseUrl)
                     } else {
@@ -71,7 +76,7 @@ open class KtorWebClient(
                     }
                 }
 
-                defaultUserAgent?.let {
+                clientConfig.defaultUserAgent?.let {
                     userAgent(it)
                 }
             }
@@ -154,7 +159,7 @@ open class KtorWebClient(
             }
 
             parameters.body?.let {
-                contentType((parameters.contentType ?: defaultContentType).let { ContentType.parse(it) })
+                contentType((parameters.contentType ?: config.defaultContentType).let { ContentType.parse(it) })
 
                 setBody(it)
             }
