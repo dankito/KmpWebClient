@@ -35,7 +35,7 @@ object JavaPlatformCommon {
             KtorEngine.Jetty -> clientCreator.createJettyHttpClient(ignoreCertificateErrors, config)
             KtorEngine.Java -> clientCreator.createJavaHttpClient(ignoreCertificateErrors, config)
             KtorEngine.Android -> clientCreator.createAndroidHttpClient(ignoreCertificateErrors, config)
-            else -> clientCreator.fallback(ignoreCertificateErrors, config)
+            else -> clientCreator.createDefaultHttpClient(ignoreCertificateErrors, config)
         }
 
     fun getFirstOfSupportedHttpClient(vararg supportedEngines: KtorEngine): KtorEngine? =

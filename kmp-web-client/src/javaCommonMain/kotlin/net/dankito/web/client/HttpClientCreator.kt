@@ -11,7 +11,11 @@ import org.eclipse.jetty.util.ssl.SslContextFactory
 
 open class HttpClientCreator {
 
-    open fun fallback(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient =
+    /**
+     * If you call the HttpClient constructor without an argument, the client will choose an engine
+     * automatically depending on the artifacts added in a build script.
+     */
+    open fun createDefaultHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient =
         HttpClient(config)
 
 
