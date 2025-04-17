@@ -8,8 +8,17 @@ plugins {
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-    // Enable the default target hierarchy:
-    targetHierarchy.default()
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        // suppresses compiler warning: [EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING] 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta.
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+
+        // avoid "variable has been optimised out" in debugging mode
+        if (System.getProperty("idea.debugger.dispatch.addr") != null) {
+            freeCompilerArgs.add("-Xdebug")
+        }
+    }
+
 
     jvmToolchain(11)
 
@@ -26,7 +35,7 @@ kotlin {
 
     js(IR) {
         moduleName = "kmpwebclient"
-//        binaries.executable()
+        binaries.library()
 
         browser {
             commonWebpackConfig {
@@ -42,28 +51,30 @@ kotlin {
             }
         }
 
-        nodejs()
+        nodejs {
+            testTask {
+                useMocha {
+                    timeout = "20s" // Mocha times out after 2 s, which is too short for some tests
+                }
+            }
+        }
     }
 
 
     linuxX64()
     mingwX64()
 
-
-    ios {
-        binaries {
-            framework {
-                baseName = "kmp-web-client"
-            }
-        }
-    }
+    iosX64()
+    iosArm64()
     iosSimulatorArm64()
     macosX64()
     macosArm64()
-    watchos()
+    watchosArm64()
     watchosSimulatorArm64()
-    tvos()
+    tvosArm64()
     tvosSimulatorArm64()
+
+    applyDefaultHierarchyTemplate()
 
 
     val coroutinesVersion: String by project
