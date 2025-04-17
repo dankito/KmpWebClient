@@ -1,7 +1,7 @@
 package net.dankito.web.client
 
 import io.ktor.client.network.sockets.*
-import io.ktor.utils.io.errors.*
+import kotlinx.io.IOException
 
 
 val WebClientException.isConnectTimeout: Boolean
