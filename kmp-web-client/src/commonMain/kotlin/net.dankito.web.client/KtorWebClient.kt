@@ -15,6 +15,7 @@ import io.ktor.util.date.*
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import net.codinux.log.logger
 import net.dankito.web.client.auth.*
 
 open class KtorWebClient(
@@ -35,8 +36,7 @@ open class KtorWebClient(
         ignoreUnknownKeys = true
     }
 
-    protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this, baseUrl, defaultUserAgent) }
-        ?: HttpClient { configureClient(this, baseUrl, defaultUserAgent) }
+    protected val log by logger()
 
     protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this, baseUrl, authentication, defaultUserAgent) }
         ?: HttpClient { configureClient(this, baseUrl, authentication, defaultUserAgent) }
@@ -108,6 +108,7 @@ open class KtorWebClient(
 
             mapHttResponse(method, parameters, httpResponse)
         } catch (e: Throwable) {
+            log.error(e) { "Error during request to ${method.value} ${parameters.url}" }
             // be aware this might not be the absolute url but only the relative url the user has passed to WebClient
             WebClientResponse(false, parameters.url, -1, error = WebClientException(e.message ?: "", e))
         }
