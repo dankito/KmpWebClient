@@ -149,7 +149,7 @@ kotlin {
 
 
 
-ext["customArtifactId"] = "ktor-web-client"
+ext["customArtifactId"] = "ktor2-web-client"
 
 if (File(projectDir, "../gradle/scripts/publish-dankito.gradle.kts").exists()) {
     apply(from = "../gradle/scripts/publish-dankito.gradle.kts")

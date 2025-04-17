@@ -1,5 +1,5 @@
 # Kotlin (Multiplatform) Web Client
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.dankito.web/ktor-web-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.dankito.web/ktor-web-client)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.dankito.web/ktor2-web-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.dankito.web/ktor2-web-client)
 
 In so many projects I need a web client. 
 
@@ -17,7 +17,7 @@ and I am ready to go to implement the domain specific code:
 ### Gradle
 
 ```
-implementation("net.dankito.web:ktor-web-client:1.0.0")
+implementation("net.dankito.web:ktor2-web-client:1.0.0")
 ```
 
 Or if you only want to have the API (see [Usage](#usage)) and implement the HTTP client by yourself, simply replace `ktor-web-client` with `web-client-api`.
