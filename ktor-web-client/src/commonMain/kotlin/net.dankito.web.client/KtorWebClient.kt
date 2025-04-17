@@ -6,6 +6,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.sse.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -13,11 +14,15 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.*
 import io.ktor.utils.io.charsets.*
 import io.ktor.util.date.*
+import kotlinx.coroutines.isActive
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import net.codinux.log.logger
 import net.dankito.web.client.auth.*
+import net.dankito.web.client.sse.ServerSentEvent
+import net.dankito.web.client.sse.ServerSentEventConfig
+import kotlin.coroutines.coroutineContext
 
 open class KtorWebClient(
     protected val config: ClientConfig = ClientConfig(),
@@ -41,8 +46,9 @@ open class KtorWebClient(
         customClientConfig: ((HttpClientConfig<*>, config: ClientConfig) -> Unit)? = null,
         defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
         defaultContentType: String = ContentTypes.JSON,
+        enableServerSentEvents: Boolean = false,
         customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
-    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType), customClientCreator)
+    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType, enableServerSentEvents), customClientCreator)
 
 
     companion object {
@@ -90,6 +96,10 @@ open class KtorWebClient(
                         }
                     }
                 }
+            }
+
+            if (config.enableServerSentEvents) {
+                install(SSE)
             }
 
             defaultRequest {
@@ -245,4 +255,41 @@ open class KtorWebClient(
         cookie.secure,
         cookie.httpOnly
     )
+
+
+    /**
+     * Listens to Server-sent events.
+     *
+     * For this method to work [ClientConfig.enableServerSentEvents] has to be set to `true` when creating [KtorWebClient].
+     */
+    suspend fun listenToSseEvents(config: ServerSentEventConfig, receivedEvent: (ServerSentEvent) -> Unit) =
+        listenToSseEventsSuspendable(config) { event ->
+            receivedEvent(event)
+        }
+
+    /**
+     * The same as [listenToSseEvents], but the [receivedEvent] callback supports suspend functions.
+     *
+     * For this method to work [ClientConfig.enableServerSentEvents] has to be set to `true` when creating [KtorWebClient].
+     */
+    suspend fun listenToSseEventsSuspendable(config: ServerSentEventConfig, receivedEvent: suspend (ServerSentEvent) -> Unit) {
+        try {
+            client.sse(config.scheme, config.host, config.port, config.path, reconnectionTime = config.reconnectionTime,
+                showCommentEvents = config.showCommentEvents, showRetryEvents = config.showRetryEvents) {
+                while (coroutineContext.isActive) {
+                    incoming.collect { event ->
+                        val mapped = ServerSentEvent(event.data, event.event, event.id, event.retry, event.comments)
+                        receivedEvent(mapped)
+                    }
+                }
+            }
+        } catch (e: Throwable) {
+            log.error(e) { "Listening to SSE events stopped with an exception".decodeURLPart() }
+        }
+
+        if (coroutineContext.isActive) {
+            log.info { "Listening to SSE events stopped, but as Coroutine is still active restarting listening ..." }
+            listenToSseEventsSuspendable(config, receivedEvent)
+        }
+    }
 }

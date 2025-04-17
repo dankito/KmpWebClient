@@ -20,6 +20,8 @@ open class ClientConfig(
     open val defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
     open val defaultContentType: String = ContentTypes.JSON,
 
+    open val enableServerSentEvents: Boolean = false,
+
     open val mapResponseHeaders: Boolean = true,
     open val mapResponseCookies: Boolean = false,
 
