@@ -6,12 +6,12 @@ import io.ktor.client.engine.curl.*
 actual object Platform {
 
     actual fun createPlatformSpecificHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient? {
-        val engine = NativePlatformCommon.getFirstOfSupportedHttpClient(KtorEngine.CIO, KtorEngine.Curl)
+        val engine = NativePlatformCommon.getFirstOfSupportedHttpClient(KtorEngine.Curl)
 
         return when (engine) {
             // iOS, ... crashes when ktor-curl is added to dependencies so we need a special handling here
             KtorEngine.Curl -> createCurlHttpClient(ignoreCertificateErrors, config)
-            else -> NativePlatformCommon.createHttpClient(engine, ignoreCertificateErrors, config)
+            else -> NativePlatformCommon.createDefaultHttpClient(engine, ignoreCertificateErrors, config)
         }
     }
 

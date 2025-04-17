@@ -127,26 +127,15 @@ kotlin {
             }
         }
 
-        val nativeMain by getting {
-            dependencies {
-                // yes, i know, Kotlin/Native has no compileOnly, but we need this dependency to configure engine and to make intention clear
-                compileOnly("io.ktor:ktor-client-cio:$ktorVersion")
-            }
-        }
-
         val linuxMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-client-cio:$ktorVersion")
-                // yes, i know, Kotlin/Native has no compileOnly, but we need this dependency to configure engine and to make intention clear
-                compileOnly("io.ktor:ktor-client-curl:$ktorVersion")
+                implementation("io.ktor:ktor-client-curl:$ktorVersion")
             }
         }
 
         val mingwMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
-                // yes, i know, Kotlin/Native has no compileOnly, but we need this dependency to configure engine and to make intention clear
-                compileOnly("io.ktor:ktor-client-curl:$ktorVersion")
             }
         }
 
