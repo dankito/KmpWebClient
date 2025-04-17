@@ -108,7 +108,7 @@ open class KtorWebClient(
 
             mapHttResponse(method, parameters, httpResponse)
         } catch (e: Throwable) {
-            WebClientResponse(false, error = e)
+            WebClientResponse(false, error = WebClientException(e.message ?: "", e))
         }
     }
 
