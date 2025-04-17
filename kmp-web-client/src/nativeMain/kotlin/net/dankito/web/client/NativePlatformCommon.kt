@@ -9,7 +9,7 @@ object NativePlatformCommon {
 
     @OptIn(InternalAPI::class)
     val availableEngines: LinkedHashSet<KtorEngine> = engines.mapNotNull { container ->
-        KtorEngine.values().firstOrNull { name -> container.toString() == name.engineName }
+        KtorEngine.entries.firstOrNull { name -> container.toString() == name.engineName }
     }.toCollection(LinkedHashSet())
 
 
