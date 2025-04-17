@@ -92,7 +92,6 @@ open class KtorWebClient(
                 if (url.startsWith("http", true)) { // absolute url
                     takeFrom(url)
                 } else { // relative url
-                    baseUrl?.let { takeFrom(it) }
                     appendPathSegments(url)
                 }
 
