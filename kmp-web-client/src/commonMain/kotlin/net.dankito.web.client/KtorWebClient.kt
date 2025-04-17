@@ -108,7 +108,8 @@ open class KtorWebClient(
 
             mapHttResponse(method, parameters, httpResponse)
         } catch (e: Throwable) {
-            WebClientResponse(false, error = WebClientException(e.message ?: "", e))
+            // be aware this might not be the absolute url but only the relative url the user has passed to WebClient
+            WebClientResponse(false, parameters.url, -1, error = WebClientException(e.message ?: "", e))
         }
     }
 
@@ -164,11 +165,11 @@ open class KtorWebClient(
         val cookies = httpResponse.setCookie().map { mapCookie(it) }
 
         return if (httpResponse.status.isSuccess()) {
-            WebClientResponse(true, statusCode, headers, cookies, body = decodeResponse(parameters, httpResponse))
+            WebClientResponse(true, url, responseDetails, body = decodeResponse(parameters, httpResponse))
         } else {
             val responseBody = httpResponse.bodyAsText()
 
-            WebClientResponse(false, statusCode, headers, cookies, WebClientException(statusCode, responseBody))
+            WebClientResponse(false, url, statusCode, headers, cookies, WebClientException(statusCode, responseBody))
         }
     }
 
