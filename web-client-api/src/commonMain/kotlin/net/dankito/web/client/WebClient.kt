@@ -24,12 +24,13 @@ suspend fun WebClient.head(url: String) = head(RequestParameters(url, Unit::clas
 
 suspend inline fun <reified T : Any> WebClient.get(url: String) = get(RequestParameters(url, T::class))
 
-suspend inline fun <reified T : Any> WebClient.post(url: String, body: Any, contentType: String = RequestParameters.DefaultContentType) =
+suspend inline fun <reified T : Any> WebClient.post(url: String, body: Any, contentType: String? = null) =
     post(RequestParameters(url, T::class, body, contentType))
 
-suspend inline fun <reified T : Any> WebClient.put(url: String, body: Any, contentType: String = RequestParameters.DefaultContentType) =
+suspend inline fun <reified T : Any> WebClient.put(url: String, body: Any, contentType: String? = null) =
     put(RequestParameters(url, T::class, body, contentType))
 
 suspend inline fun <reified T : Any> WebClient.delete(url: String) = delete(RequestParameters(url, T::class))
 
-suspend inline fun <reified T : Any> WebClient.custom(httpMethod: String, url: String, body: Any? = null) = custom(httpMethod, RequestParameters(url, T::class, body))
+suspend inline fun <reified T : Any> WebClient.custom(httpMethod: String, url: String, body: Any? = null, contentType: String? = null) =
+    custom(httpMethod, RequestParameters(url, T::class, body, contentType))
