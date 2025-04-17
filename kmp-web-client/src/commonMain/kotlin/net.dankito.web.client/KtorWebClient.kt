@@ -2,10 +2,10 @@ package net.dankito.web.client
 
 import io.ktor.client.*
 import io.ktor.client.call.body
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.timeout
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -15,9 +15,11 @@ import io.ktor.util.date.*
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import net.dankito.web.client.auth.*
 
 open class KtorWebClient(
     baseUrl: String? = null,
+    authentication: Authentication? = null,
     /**
      * Be aware the following engines do not support disabling certificate check:
      * - JavaScript HttpClient
@@ -36,12 +38,29 @@ open class KtorWebClient(
     protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this, baseUrl, defaultUserAgent) }
         ?: HttpClient { configureClient(this, baseUrl, defaultUserAgent) }
 
-    private fun configureClient(config: HttpClientConfig<*>, baseUrl: String?, defaultUserAgent: String?) {
+    protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this, baseUrl, authentication, defaultUserAgent) }
+        ?: HttpClient { configureClient(this, baseUrl, authentication, defaultUserAgent) }
+
+    private fun configureClient(config: HttpClientConfig<*>, baseUrl: String?, authentication: Authentication?, defaultUserAgent: String?) {
         config.apply {
             install(HttpTimeout)
             install(ContentNegotiation) {
                 json()
             }
+
+            if (authentication != null) {
+                install(Auth) {
+                    (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
+                        basic {
+                            sendWithoutRequest { true }
+                            credentials {
+                                BasicAuthCredentials(basicAuth.username, basicAuth.password)
+                            }
+                        }
+                    }
+                }
+            }
+
             defaultRequest {
                 baseUrl?.let {
                     if (baseUrl.endsWith("/")) { // add trailing slash, otherwise last path segment gets cut off when appending to relative url
