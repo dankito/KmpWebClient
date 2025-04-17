@@ -66,16 +66,16 @@ open class KtorWebClient(
         ?: HttpClient { configureClient(this, config) }
 
 
-    private fun configureClient(config: HttpClientConfig<*>, clientConfig: ClientConfig) {
-        config.apply {
+    private fun configureClient(clientConfig: HttpClientConfig<*>, config: ClientConfig) {
+        clientConfig.apply {
             install(HttpTimeout)
             install(ContentNegotiation) {
                 json()
             }
 
-            if (clientConfig.authentication != null) {
+            if (config.authentication != null) {
                 install(Auth) {
-                    (clientConfig.authentication as? BasicAuthAuthentication)?.let { basicAuth ->
+                    (config.authentication as? BasicAuthAuthentication)?.let { basicAuth ->
                         basic {
                             sendWithoutRequest { true }
                             credentials {
@@ -87,7 +87,7 @@ open class KtorWebClient(
             }
 
             defaultRequest {
-                clientConfig.baseUrl?.let { baseUrl ->
+                config.baseUrl?.let { baseUrl ->
                     if (baseUrl.endsWith("/")) { // add trailing slash, otherwise last path segment gets cut off when appending to relative url
                         url(baseUrl)
                     } else {
@@ -95,7 +95,7 @@ open class KtorWebClient(
                     }
                 }
 
-                clientConfig.defaultUserAgent?.let {
+                config.defaultUserAgent?.let {
                     userAgent(it)
                 }
             }
