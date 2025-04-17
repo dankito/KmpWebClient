@@ -38,6 +38,16 @@ open class KtorWebClient(
     ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, defaultUserAgent, defaultContentType))
 
 
+    companion object {
+        /**
+         * If you call the HttpClient constructor without an argument, the client will choose an engine
+         * automatically depending on the artifacts added in a build script.
+         */
+        fun createDefaultHttpClient(config: HttpClientConfig<*>.() -> Unit) =
+            HttpClient(config)
+    }
+
+
     protected open val json = Json {
         ignoreUnknownKeys = true
     }

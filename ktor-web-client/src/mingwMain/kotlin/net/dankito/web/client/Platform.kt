@@ -10,7 +10,7 @@ actual object Platform {
 
         return when (engine) {
             KtorEngine.WinHttp -> createWinHttpClient(ignoreCertificateErrors, config)
-            else -> NativePlatformCommon.createDefaultHttpClient(engine, ignoreCertificateErrors, config)
+            else -> KtorWebClient.createDefaultHttpClient(config)
         }
     }
 

@@ -11,7 +11,7 @@ actual object Platform {
         return when (engine) {
             // iOS, ... crashes when ktor-curl is added to dependencies so we need a special handling here
             KtorEngine.Curl -> createCurlHttpClient(ignoreCertificateErrors, config)
-            else -> NativePlatformCommon.createDefaultHttpClient(engine, ignoreCertificateErrors, config)
+            else -> KtorWebClient.createDefaultHttpClient(config)
         }
     }
 

@@ -15,8 +15,8 @@ open class HttpClientCreator {
      * If you call the HttpClient constructor without an argument, the client will choose an engine
      * automatically depending on the artifacts added in a build script.
      */
-    open fun createDefaultHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient =
-        HttpClient(config)
+    open fun createDefaultHttpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient =
+        KtorWebClient.createDefaultHttpClient(config)
 
 
     open fun createOkHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient =
