@@ -195,9 +195,10 @@ open class KtorWebClient(
     }
 
     protected open suspend fun <T : Any> mapHttResponse(method: HttpMethod, parameters: RequestParameters<T>, httpResponse: HttpResponse): WebClientResponse<T> {
-        val headers = httpResponse.headers.toMap()
-        val cookies = httpResponse.setCookie().map { mapCookie(it) }
+        val headers = if (config.mapResponseHeaders) httpResponse.headers.toMap() else emptyMap()
+        val cookies = if (config.mapResponseCookies) httpResponse.setCookie().map { mapCookie(it) } else emptyList()
         val url = httpResponse.request.url.toString()
+
         val responseDetails = ResponseDetails(httpResponse.status.value, httpResponse.status.description, httpResponse.requestTime, httpResponse.responseTime,
             httpResponse.version.name, headers, cookies, httpResponse.contentType()?.withoutParameters()?.toString(),
             httpResponse.contentLength(), httpResponse.charset()?.name)
