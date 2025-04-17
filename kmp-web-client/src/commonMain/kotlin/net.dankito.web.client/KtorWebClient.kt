@@ -24,17 +24,18 @@ open class KtorWebClient(
      * - CIO on native platforms
      * - WinHttp
      */
-    ignoreCertificateErrors: Boolean = false
+    ignoreCertificateErrors: Boolean = false,
+    defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
 ) : WebClient {
 
     protected open val json = Json {
         ignoreUnknownKeys = true
     }
 
-    protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this, baseUrl) }
-        ?: HttpClient { configureClient(this, baseUrl) }
+    protected open val client = Platform.createPlatformSpecificHttpClient(ignoreCertificateErrors) { configureClient(this, baseUrl, defaultUserAgent) }
+        ?: HttpClient { configureClient(this, baseUrl, defaultUserAgent) }
 
-    private fun configureClient(config: HttpClientConfig<*>, baseUrl: String?) {
+    private fun configureClient(config: HttpClientConfig<*>, baseUrl: String?, defaultUserAgent: String?) {
         config.apply {
             install(HttpTimeout)
             install(ContentNegotiation) {
@@ -47,6 +48,10 @@ open class KtorWebClient(
                     } else {
                         url(baseUrl + "/")
                     }
+                }
+
+                defaultUserAgent?.let {
+                    userAgent(it)
                 }
             }
         }
