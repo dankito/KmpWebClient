@@ -4,10 +4,12 @@ import io.ktor.client.network.sockets.*
 import io.ktor.utils.io.errors.*
 
 open class WebClientException(
-    open val httpStatusCode: Int,
     errorMessage: String,
-    cause: Throwable? = null
+    cause: Throwable? = null,
+    open val responseDetails: ResponseDetails? = null,
 ) : Exception(errorMessage, cause) {
+
+    val httpStatusCode = responseDetails?.statusCode ?: -1
 
     val isConnectTimeout = cause is ConnectTimeoutException
 

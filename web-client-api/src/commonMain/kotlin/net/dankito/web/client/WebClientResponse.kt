@@ -3,17 +3,17 @@ package net.dankito.web.client
 open class WebClientResponse<T>(
     open val successful: Boolean,
     open val url: String,
-    open val statusCode: Int = -1,
-    open val headers: Map<String, List<String>>? = null,
-    open val cookies: List<Cookie> = listOf(),
+    open val responseDetails: ResponseDetails? = null,
     open val error: Throwable? = null,
     open val body: T? = null
 ) {
 
+    val statusCode = responseDetails?.statusCode ?: -1
+
     open fun getHeaderValue(headerName: String): String? {
         val headerNameLowerCased = headerName.lowercase() // header names are case insensitive, so compare them lower cased
 
-        headers?.let { headers ->
+        responseDetails?.headers?.let { headers ->
             headers.keys.forEach {
                 if(it.lowercase() == headerNameLowerCased) {
                     return headers[it]?.firstOrNull()
@@ -45,7 +45,7 @@ open class WebClientResponse<T>(
     }
 
     open fun getCookie(cookieName: String): Cookie? {
-        return cookies.firstOrNull { cookieName == it.name }
+        return responseDetails?.cookies?.firstOrNull { cookieName == it.name }
     }
 
     open val retryAfterSeconds: Int? by lazy {
