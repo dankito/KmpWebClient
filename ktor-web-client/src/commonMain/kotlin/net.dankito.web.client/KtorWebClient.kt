@@ -68,9 +68,14 @@ open class KtorWebClient(
 
     private fun configureClient(clientConfig: HttpClientConfig<*>, config: ClientConfig) {
         clientConfig.apply {
-            install(HttpTimeout)
             install(ContentNegotiation) {
                 json()
+            }
+
+            install(HttpTimeout) {
+                config.connectTimeoutMillis?.let { connectTimeoutMillis = it }
+                config.socketTimeoutMillis?.let { socketTimeoutMillis = it }
+                config.requestTimeoutMillis?.let { requestTimeoutMillis = it }
             }
 
             if (config.authentication != null) {
@@ -172,9 +177,9 @@ open class KtorWebClient(
 
             timeout {
                 // JS doesn't support connectTimeout and socketTimeout
-                connectTimeoutMillis = parameters.connectTimeoutMillis
-                socketTimeoutMillis = parameters.socketTimeoutMillis
-                requestTimeoutMillis = parameters.requestTimeoutMillis
+                parameters.connectTimeoutMillis?.let { connectTimeoutMillis = it }
+                parameters.socketTimeoutMillis?.let { socketTimeoutMillis = it }
+                parameters.requestTimeoutMillis?.let { requestTimeoutMillis = it }
             }
 
             parameters.body?.let {

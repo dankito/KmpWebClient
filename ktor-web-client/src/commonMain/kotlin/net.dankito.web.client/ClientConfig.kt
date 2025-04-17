@@ -16,6 +16,12 @@ open class ClientConfig(
 
     open val defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
     open val defaultContentType: String = ContentTypes.JSON,
+
+
+    // JS doesn't support connectTimeout and socketTimeout
+    open val connectTimeoutMillis: Long? = 5_000, // to have a faster response / result when connecting is not possible
+    open val socketTimeoutMillis: Long? = null,
+    open val requestTimeoutMillis: Long? = 15_000, // in slow environments give request some time to complete (but shouldn't be necessary, we only have small response bodies)
 ) {
     override fun toString() = "baseUrl = $baseUrl, authentication = $authentication, ignoreCertificateErrors = $ignoreCertificateErrors"
 }

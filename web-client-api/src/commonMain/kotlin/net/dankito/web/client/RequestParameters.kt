@@ -12,9 +12,9 @@ open class RequestParameters<T : Any>(
     open val queryParameters: Map<String, Any> = mapOf(),
     open val cookies: List<Cookie> = mutableListOf(),
     open val userAgent: String? = DefaultUserAgent,
-    open val connectTimeoutMillis: Long = 5_000, // to have a faster response / result when connecting is not possible
+    open val connectTimeoutMillis: Long? = null,
     open val socketTimeoutMillis: Long? = null,
-    open val requestTimeoutMillis: Long = 15_000 // in slow environments give request some time to complete (but shouldn't be necessary, we only have small response bodies)
+    open val requestTimeoutMillis: Long? = null,
 ) {
 
     companion object {
