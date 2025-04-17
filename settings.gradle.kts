@@ -22,5 +22,3 @@ rootProject.name = "KmpWebClient"
 
 include("web-client-api")
 include(":ktor-web-client")
-include(":android")
-include(":jvm")
