@@ -5,6 +5,9 @@ import java.util.*
 
 object JavaPlatformCommon {
 
+    var clientCreator: HttpClientCreator = HttpClientCreator()
+
+
     // copied from Ktor source, this is how Ktor loads available engines on the JVM
     val engines: List<HttpClientEngineContainer> = HttpClientEngineContainer::class.java.let {
         ServiceLoader.load(it, it.classLoader).toList()
@@ -23,12 +26,12 @@ object JavaPlatformCommon {
 
     fun createHttpClient(engine: KtorEngine?, ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit) =
         when (engine) {
-            KtorEngine.OkHttp -> HttpClientCreator.createOkHttpClient(ignoreCertificateErrors, config)
-            KtorEngine.CIO -> HttpClientCreator.createCIOHttpClient(ignoreCertificateErrors, config)
-            KtorEngine.Apache -> HttpClientCreator.createApacheHttpClient(ignoreCertificateErrors, config)
-            KtorEngine.Jetty -> HttpClientCreator.createJettyHttpClient(ignoreCertificateErrors, config)
-            KtorEngine.Android -> HttpClientCreator.createAndroidHttpClient(ignoreCertificateErrors, config)
-            else -> HttpClientCreator.fallback(ignoreCertificateErrors, config)
+            KtorEngine.OkHttp -> clientCreator.createOkHttpClient(ignoreCertificateErrors, config)
+            KtorEngine.CIO -> clientCreator.createCIOHttpClient(ignoreCertificateErrors, config)
+            KtorEngine.Apache -> clientCreator.createApacheHttpClient(ignoreCertificateErrors, config)
+            KtorEngine.Jetty -> clientCreator.createJettyHttpClient(ignoreCertificateErrors, config)
+            KtorEngine.Android -> clientCreator.createAndroidHttpClient(ignoreCertificateErrors, config)
+            else -> clientCreator.fallback(ignoreCertificateErrors, config)
         }
 
 }
