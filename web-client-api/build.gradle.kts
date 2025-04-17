@@ -63,15 +63,12 @@ kotlin {
 
 
     val ktorVersion: String by project
-    val kotlinCoroutinesVersion: String by project
 
     sourceSets {
         commonMain.dependencies {
-            implementation("io.ktor:ktor-client-core:$ktorVersion")
-            implementation("io.ktor:ktor-client-auth:$ktorVersion")
-            implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-            implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+            implementation("io.ktor:ktor-client-core:$ktorVersion") // TODO: also remove that one
         }
+
         commonTest.dependencies {
 
         }
