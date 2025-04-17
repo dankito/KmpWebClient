@@ -27,22 +27,9 @@ kotlin {
     js {
         binaries.library()
 
-        browser {
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                    useFirefoxHeadless()
-                }
-            }
-        }
+        browser()
 
-        nodejs {
-            testTask {
-                useMocha {
-                    timeout = "20s" // Mocha times out after 2 s, which is too short for some tests
-                }
-            }
-        }
+        nodejs()
     }
 
 
@@ -66,10 +53,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-
-        }
-
-        commonTest.dependencies {
 
         }
     }
