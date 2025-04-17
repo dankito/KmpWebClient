@@ -66,7 +66,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("io.ktor:ktor-client-core:$ktorVersion") // TODO: also remove that one
+
         }
 
         commonTest.dependencies {
