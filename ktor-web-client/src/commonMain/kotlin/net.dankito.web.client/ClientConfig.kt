@@ -20,8 +20,6 @@ open class ClientConfig(
     open val defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
     open val defaultContentType: String = ContentTypes.JSON,
 
-    open val enableServerSentEvents: Boolean = false,
-
     // JS doesn't support connectTimeout and socketTimeout
     open val connectTimeoutMillis: Long? = 5_000, // to have a faster response / result when connecting is not possible
     open val socketTimeoutMillis: Long? = null,

@@ -47,9 +47,8 @@ open class KtorWebClient(
         customClientConfig: ((HttpClientConfig<*>, config: ClientConfig) -> Unit)? = null,
         defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
         defaultContentType: String = ContentTypes.JSON,
-        enableServerSentEvents: Boolean = false,
         customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
-    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType, enableServerSentEvents), customClientCreator)
+    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType), customClientCreator)
 
 
     companion object {
@@ -99,9 +98,13 @@ open class KtorWebClient(
                 }
             }
 
-            if (config.enableServerSentEvents) {
-                install(SSE)
-            }
+            /**
+             * SSEPlugin in Ktor (if installed but unused):
+             * - Adds routing capability for event streams
+             * - Doesn’t do anything unless a request matches an SSE route
+             * - Minimal cost unless actively used
+             */
+            install(SSE)
 
             defaultRequest {
                 config.baseUrl?.let { baseUrl ->
@@ -287,8 +290,6 @@ open class KtorWebClient(
 
     /**
      * Listens to Server-sent events.
-     *
-     * For this method to work [ClientConfig.enableServerSentEvents] has to be set to `true` when creating [KtorWebClient].
      */
     suspend fun listenToSseEvents(config: ServerSentEventConfig, receivedEvent: (ServerSentEvent) -> Unit) =
         listenToSseEventsSuspendable(config) { event ->
@@ -297,8 +298,6 @@ open class KtorWebClient(
 
     /**
      * The same as [listenToSseEvents], but the [receivedEvent] callback supports suspend functions.
-     *
-     * For this method to work [ClientConfig.enableServerSentEvents] has to be set to `true` when creating [KtorWebClient].
      */
     suspend fun listenToSseEventsSuspendable(config: ServerSentEventConfig, receivedEvent: suspend (ServerSentEvent) -> Unit) {
         try {
