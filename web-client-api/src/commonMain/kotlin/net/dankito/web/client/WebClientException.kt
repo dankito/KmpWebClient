@@ -1,9 +1,10 @@
 package net.dankito.web.client
 
 open class WebClientException(
-    errorMessage: String,
+    errorMessage: String?,
     cause: Throwable? = null,
     open val responseDetails: ResponseDetails? = null,
+    open val responseBody: String? = null
 ) : Exception(errorMessage, cause) {
 
     val httpStatusCode = responseDetails?.statusCode ?: -1
