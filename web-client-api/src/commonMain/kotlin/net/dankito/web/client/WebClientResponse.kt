@@ -2,7 +2,7 @@ package net.dankito.web.client
 
 open class WebClientResponse<T>(
     open val successful: Boolean,
-    open val url: String,
+    open val requestedUrl: String,
     open val responseDetails: ResponseDetails? = null,
     open val error: Throwable? = null,
     open val body: T? = null
