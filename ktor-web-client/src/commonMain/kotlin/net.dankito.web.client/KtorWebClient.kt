@@ -145,7 +145,7 @@ open class KtorWebClient(
         makeRequest(method, parameters)
 
 
-    protected open suspend fun <T : Any> makeRequest(method: HttpMethod, parameters: RequestParameters<T>): WebClientResponse<T> {
+    protected open suspend fun <T : Any> makeRequest(method: HttpMethod, parameters: RequestParameters<T>): WebClientResult<T> {
         return try {
             val httpResponse = client.request {
                 configureRequest(this, method, parameters)
@@ -156,7 +156,7 @@ open class KtorWebClient(
             log.error(e) { "Error during request to ${method.value} ${parameters.url}" }
             val (url, errorType) = getErrorTypeAndRequestedUrl(e)
             // be aware this might not be the absolute url but only the relative url the user has passed to WebClient
-            WebClientResponse(url ?: parameters.url, false, null, errorType, WebClientException(e.message, e))
+            WebClientResult(url ?: parameters.url, false, null, errorType, WebClientException(e.message, e))
         }
     }
 
@@ -206,7 +206,7 @@ open class KtorWebClient(
         }
     }
 
-    protected open suspend fun <T : Any> mapHttResponse(method: HttpMethod, parameters: RequestParameters<T>, httpResponse: HttpResponse): WebClientResponse<T> {
+    protected open suspend fun <T : Any> mapHttResponse(method: HttpMethod, parameters: RequestParameters<T>, httpResponse: HttpResponse): WebClientResult<T> {
         val headers = if (config.mapResponseHeaders) httpResponse.headers.toMap() else emptyMap()
         val cookies = if (config.mapResponseCookies) httpResponse.setCookie().map { mapCookie(it) } else emptyList()
         val url = getUrl(httpResponse)
@@ -217,16 +217,16 @@ open class KtorWebClient(
 
         return if (httpResponse.status.isSuccess()) {
             try {
-                WebClientResponse(url, true, responseDetails, body = decodeResponse(parameters, httpResponse))
+                WebClientResult(url, true, responseDetails, body = decodeResponse(parameters, httpResponse))
             } catch (e: Throwable) {
                 log.error(e) { "Error while mapping response of: ${method.value} ${httpResponse.request.url}, ${httpResponse.headers.toMap()}" }
-                WebClientResponse(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails))
+                WebClientResult(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails))
             }
         } else {
             val responseBody = httpResponse.bodyAsText()
             val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
 
-            WebClientResponse(url, false, responseDetails, errorType, WebClientException("The HTTP response indicated an error: " +
+            WebClientResult(url, false, responseDetails, errorType, WebClientException("The HTTP response indicated an error: " +
                     "${httpResponse.status.value} ${httpResponse.status.description}", null, responseDetails, responseBody))
         }
     }

@@ -2,20 +2,20 @@ package net.dankito.web.client
 
 interface WebClient {
 
-    suspend fun head(parameters: RequestParameters<Unit>): WebClientResponse<Unit>
+    suspend fun head(parameters: RequestParameters<Unit>): WebClientResult<Unit>
 
-    suspend fun <T : Any> get(parameters: RequestParameters<T>): WebClientResponse<T>
+    suspend fun <T : Any> get(parameters: RequestParameters<T>): WebClientResult<T>
 
-    suspend fun <T : Any> post(parameters: RequestParameters<T>): WebClientResponse<T>
+    suspend fun <T : Any> post(parameters: RequestParameters<T>): WebClientResult<T>
 
-    suspend fun <T : Any> put(parameters: RequestParameters<T>): WebClientResponse<T>
+    suspend fun <T : Any> put(parameters: RequestParameters<T>): WebClientResult<T>
 
-    suspend fun <T : Any> delete(parameters: RequestParameters<T>): WebClientResponse<T>
+    suspend fun <T : Any> delete(parameters: RequestParameters<T>): WebClientResult<T>
 
     /**
      * To support custom HTTP methods like PROPFIND and REPORT (WebDAV).
      */
-    suspend fun <T : Any> custom(httpMethod: String, parameters: RequestParameters<T>): WebClientResponse<T>
+    suspend fun <T : Any> custom(httpMethod: String, parameters: RequestParameters<T>): WebClientResult<T>
 
 }
 

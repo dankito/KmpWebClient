@@ -68,7 +68,7 @@ class KtorWebClientTest {
         assertRequestFailed(response, ClientErrorType.NetworkError)
     }
 
-    private fun assertRequestFailed(response: WebClientResponse<*>, errorType: ClientErrorType) {
+    private fun assertRequestFailed(response: WebClientResult<*>, errorType: ClientErrorType) {
         assertThat(response.successful).isFalse()
         assertThat(response.errorType).isNotNull().isEqualByComparingTo(errorType)
     }

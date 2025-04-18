@@ -1,6 +1,6 @@
 package net.dankito.web.client
 
-open class WebClientResponse<T>(
+open class WebClientResult<T>(
     /**
      * The URL that the web client has requested which may be a combination of baseUrl set on WebClient and relative
      * URL used for request.
