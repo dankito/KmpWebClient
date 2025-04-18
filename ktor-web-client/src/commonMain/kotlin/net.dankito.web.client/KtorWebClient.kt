@@ -154,7 +154,7 @@ open class KtorWebClient(
         } catch (e: Throwable) {
             log.error(e) { "Error during request to ${method.value} ${parameters.url}" }
             // be aware this might not be the absolute url but only the relative url the user has passed to WebClient
-            WebClientResponse(false, parameters.url, error = WebClientException(e.message, e))
+            WebClientResponse(parameters.url, false, error = WebClientException(e.message, e))
         }
     }
 
@@ -215,15 +215,15 @@ open class KtorWebClient(
 
         return if (httpResponse.status.isSuccess()) {
             try {
-                WebClientResponse(true, url, responseDetails, body = decodeResponse(parameters, httpResponse))
+                WebClientResponse(url, true, responseDetails, body = decodeResponse(parameters, httpResponse))
             } catch (e: Throwable) {
                 log.error(e) { "Error while mapping response of: ${method.value} ${httpResponse.request.url}, ${httpResponse.headers.toMap()}" }
-                WebClientResponse(false, url, responseDetails, WebClientException(e.message, e, responseDetails))
+                WebClientResponse(url, false, responseDetails, WebClientException(e.message, e, responseDetails))
             }
         } else {
             val responseBody = httpResponse.bodyAsText()
 
-            WebClientResponse(false, url, responseDetails, WebClientException("The HTTP response indicated an error: " +
+            WebClientResponse(url, false, responseDetails, WebClientException("The HTTP response indicated an error: " +
                     "${httpResponse.status.value} ${httpResponse.status.description}", null, responseDetails, responseBody))
         }
     }
