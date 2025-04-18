@@ -67,12 +67,6 @@ val client = KtorWebClient(
         // the ContentType HTTP header that should be used if request specifies a body but no content type (defaults to "application/json; charset=UTF-8")
         defaultContentType = "application/json; charset=UTF-8",
         
-        // if response headers should be mapped and added to WebClientResponse -> ResponseDetails (defaults to true)
-        mapResponseHeaders = true,
-
-        // if response cookies should be mapped and added to WebClientResponse -> ResponseDetails (defaults to false)
-        mapResponseCookies = false,
-        
         // the connect timeout in milliseconds for all requests of this HTTP client (if not overwritten in RequestParameters). Defaults to 5 seconds.
         connectTimeoutMillis = 5_0000,
         // the socket timeout in milliseconds for all requests of this HTTP client (if not overwritten in RequestParameters). Defaults to not set.
@@ -147,7 +141,6 @@ val requestTime = response.responseDetails?.requestTime
 val responseTime = response.responseDetails?.responseTime
 
 val headers = response.responseDetails?.headers
-// only set if ClientConfig.mapResponseCookies is set to true
 val cookies = response.responseDetails?.cookies
 ```
 
