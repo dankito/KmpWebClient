@@ -2,6 +2,15 @@ package net.dankito.web.client
 
 open class WebClientResponse<T>(
     /**
+     * The URL that the web client has requested which may be a combination of baseUrl set on WebClient and relative
+     * URL used for request.
+     *
+     * In case of network error may only the (relative) URL used for request, not the URL the web client really has
+     * requested.
+     */
+    open val requestedUrl: String,
+
+    /**
      * Is true if
      * - a response has been received,
      * - the HTTP status code is in range 200..299 (= [ResponseDetails.isSuccessResponse] is true),
@@ -11,15 +20,6 @@ open class WebClientResponse<T>(
      * [ResponseDetails.isSuccessResponse] is `true`.
      */
     open val successful: Boolean,
-
-    /**
-     * The URL that the web client has requested which may be a combination of baseUrl set on WebClient and relative
-     * URL used for request.
-     *
-     * In case of network error may only the (relative) URL used for request, not the URL the web client really has
-     * requested.
-     */
-    open val requestedUrl: String,
 
     /**
      * In case a response has been retrieved, details of the response like headers, cookies, ...
