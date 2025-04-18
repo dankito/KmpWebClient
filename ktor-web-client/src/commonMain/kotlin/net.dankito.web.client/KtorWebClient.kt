@@ -13,16 +13,14 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.*
-import io.ktor.utils.io.charsets.*
 import io.ktor.util.date.*
-import kotlinx.coroutines.isActive
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import net.codinux.log.logger
 import net.dankito.web.client.auth.*
-import net.dankito.web.client.sse.ServerSentEvent
-import kotlin.coroutines.coroutineContext
+import net.dankito.web.client.sse.KtorSseClient
+import net.dankito.web.client.sse.SseClient
 
 open class KtorWebClient(
     protected val config: ClientConfig = ClientConfig(),
@@ -58,6 +56,9 @@ open class KtorWebClient(
         fun createDefaultHttpClient(config: HttpClientConfig<*>.() -> Unit) =
             HttpClient(config)
     }
+
+
+    open val sse: SseClient by lazy { KtorSseClient(client) }
 
 
     protected open val json = Json {
