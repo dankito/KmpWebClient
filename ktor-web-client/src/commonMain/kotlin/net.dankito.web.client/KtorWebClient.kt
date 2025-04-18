@@ -210,9 +210,10 @@ open class KtorWebClient(
         val headers = if (config.mapResponseHeaders) httpResponse.headers.toMap() else emptyMap()
         val cookies = if (config.mapResponseCookies) httpResponse.setCookie().map { mapCookie(it) } else emptyList()
         val url = getUrl(httpResponse)
+        val httpVersion = httpResponse.version.let { if (it.name == "HTTP") "${it.major}.${it.minor}" else it.toString() }
 
         val responseDetails = ResponseDetails(httpResponse.status.value, httpResponse.status.description, httpResponse.requestTime.toHttpDate(), httpResponse.responseTime.toHttpDate(),
-            httpResponse.version.name, headers, cookies, httpResponse.contentType()?.withoutParameters()?.toString(),
+            httpVersion, headers, cookies, httpResponse.contentType()?.withoutParameters()?.toString(),
             httpResponse.contentLength(), httpResponse.charset()?.name)
 
         return if (httpResponse.status.isSuccess()) {
