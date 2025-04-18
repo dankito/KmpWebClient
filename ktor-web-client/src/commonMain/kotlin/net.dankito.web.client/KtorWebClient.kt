@@ -22,7 +22,6 @@ import kotlinx.serialization.serializer
 import net.codinux.log.logger
 import net.dankito.web.client.auth.*
 import net.dankito.web.client.sse.ServerSentEvent
-import net.dankito.web.client.sse.ServerSentEventConfig
 import kotlin.coroutines.coroutineContext
 
 open class KtorWebClient(
@@ -290,19 +289,22 @@ open class KtorWebClient(
 
     /**
      * Listens to Server-sent events.
+     *
+     * @param url Relative or absolute URL
      */
-    suspend fun listenToSseEvents(config: ServerSentEventConfig, receivedEvent: (ServerSentEvent) -> Unit) =
-        listenToSseEventsSuspendable(config) { event ->
-            receivedEvent(event)
-        }
+    suspend fun listenToSseEvents(url: String, receivedEvent: (ServerSentEvent) -> Unit) =
+        listenToSseEventsSuspendable(url, receivedEvent)
 
     /**
+     * Listens to Server-sent events.
+     *
      * The same as [listenToSseEvents], but the [receivedEvent] callback supports suspend functions.
+     *
+     * @param url Relative or absolute URL
      */
-    suspend fun listenToSseEventsSuspendable(config: ServerSentEventConfig, receivedEvent: suspend (ServerSentEvent) -> Unit) {
+    suspend fun listenToSseEventsSuspendable(url: String, receivedEvent: suspend (ServerSentEvent) -> Unit) {
         try {
-            client.sse(config.scheme, config.host, config.port, config.path, reconnectionTime = config.reconnectionTime,
-                showCommentEvents = config.showCommentEvents, showRetryEvents = config.showRetryEvents) {
+            client.sse(url) {
                 while (coroutineContext.isActive) {
                     incoming.collect { event ->
                         val mapped = ServerSentEvent(event.data, event.event, event.id, event.retry, event.comments)
@@ -316,7 +318,7 @@ open class KtorWebClient(
 
         if (coroutineContext.isActive) {
             log.info { "Listening to SSE events stopped, but as Coroutine is still active restarting listening ..." }
-            listenToSseEventsSuspendable(config, receivedEvent)
+            listenToSseEventsSuspendable(url, receivedEvent)
         }
     }
 }
