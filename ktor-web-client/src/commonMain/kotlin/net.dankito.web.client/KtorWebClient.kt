@@ -2,6 +2,7 @@ package net.dankito.web.client
 
 import io.ktor.client.*
 import io.ktor.client.call.body
+import io.ktor.client.network.sockets.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
@@ -143,8 +144,9 @@ open class KtorWebClient(
             mapHttResponse(method, parameters, httpResponse)
         } catch (e: Throwable) {
             log.error(e) { "Error during request to ${method.value} ${parameters.url}" }
+            val (url, errorType) = getErrorTypeAndRequestedUrl(e)
             // be aware this might not be the absolute url but only the relative url the user has passed to WebClient
-            WebClientResponse(parameters.url, false, error = WebClientException(e.message, e))
+            WebClientResponse(url ?: parameters.url, false, null, errorType, WebClientException(e.message, e))
         }
     }
 
@@ -197,7 +199,7 @@ open class KtorWebClient(
     protected open suspend fun <T : Any> mapHttResponse(method: HttpMethod, parameters: RequestParameters<T>, httpResponse: HttpResponse): WebClientResponse<T> {
         val headers = if (config.mapResponseHeaders) httpResponse.headers.toMap() else emptyMap()
         val cookies = if (config.mapResponseCookies) httpResponse.setCookie().map { mapCookie(it) } else emptyList()
-        val url = httpResponse.request.url.toString()
+        val url = getUrl(httpResponse)
 
         val responseDetails = ResponseDetails(httpResponse.status.value, httpResponse.status.description, httpResponse.requestTime.toHttpDate(), httpResponse.responseTime.toHttpDate(),
             httpResponse.version.name, headers, cookies, httpResponse.contentType()?.withoutParameters()?.toString(),
@@ -208,12 +210,13 @@ open class KtorWebClient(
                 WebClientResponse(url, true, responseDetails, body = decodeResponse(parameters, httpResponse))
             } catch (e: Throwable) {
                 log.error(e) { "Error while mapping response of: ${method.value} ${httpResponse.request.url}, ${httpResponse.headers.toMap()}" }
-                WebClientResponse(url, false, responseDetails, WebClientException(e.message, e, responseDetails))
+                WebClientResponse(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails))
             }
         } else {
             val responseBody = httpResponse.bodyAsText()
+            val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
 
-            WebClientResponse(url, false, responseDetails, WebClientException("The HTTP response indicated an error: " +
+            WebClientResponse(url, false, responseDetails, errorType, WebClientException("The HTTP response indicated an error: " +
                     "${httpResponse.status.value} ${httpResponse.status.description}", null, responseDetails, responseBody))
         }
     }
@@ -236,6 +239,39 @@ open class KtorWebClient(
             json.decodeFromString(responseClass.serializer(), clientResponse.body())
         }
     }
+
+    protected open fun getErrorTypeAndRequestedUrl(e: Throwable): Pair<String?, ClientErrorType> = when (e) {
+        is ConnectTimeoutException, is SocketTimeoutException, is HttpRequestTimeoutException
+            -> tryToExtractRequestedUrl(e) to ClientErrorType.Timeout
+        is ClientRequestException -> getUrl(e.response) to ClientErrorType.ClientError
+        is ServerResponseException -> getUrl(e.response) to ClientErrorType.ServerError
+        is ResponseException -> getUrl(e.response) to ClientErrorType.Unknown
+        is URLParserException -> null to ClientErrorType.ClientError
+        else -> {
+            val message = e.message ?: ""
+            if (message.contains("Connection failed", true) || message.contains("Connection refused", true)) {
+                null to ClientErrorType.NetworkError
+            } else if (e::class.simpleName == "InterruptedIOException") { // on JVM io.ktor.client.network.sockets.InterruptedIOException is an internal class (looks like a bug to me)
+                tryToExtractRequestedUrl(e) to ClientErrorType.Timeout
+            } else {
+                null to ClientErrorType.Unknown
+            }
+        }
+    }
+
+    protected open fun tryToExtractRequestedUrl(e: Throwable): String? {
+        val startIndex = e.message?.indexOf("[url=")?.plus("[url=".length) ?: -1
+        if (startIndex > 5) {
+            val endIndex = e.message?.indexOf(", ", startIndex + 1) ?: -1
+            if (endIndex > startIndex) {
+                return e.message?.substring(startIndex, endIndex)
+            }
+        }
+
+        return null
+    }
+
+    protected open fun getUrl(response: HttpResponse): String = response.request.url.toString()
 
     protected open fun mapCookie(cookie: io.ktor.http.Cookie) = Cookie(
         cookie.name,

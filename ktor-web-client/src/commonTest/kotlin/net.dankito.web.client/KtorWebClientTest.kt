@@ -1,10 +1,11 @@
 package net.dankito.web.client
 
+import assertk.assertThat
+import assertk.assertions.isEqualByComparingTo
+import assertk.assertions.isFalse
+import assertk.assertions.isNotNull
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class KtorWebClientTest {
 
@@ -51,6 +52,25 @@ class KtorWebClientTest {
         assertTrue(response.successful)
         assertEquals(200, response.statusCode)
         assertNotNull(response.body)
+    }
+
+    @Test
+    fun timeout() = runTest {
+        val response = underTest.get(RequestParameters(Url, String::class, requestTimeoutMillis = 1))
+
+        assertRequestFailed(response, ClientErrorType.Timeout)
+    }
+
+    @Test
+    fun notFound() = runTest {
+        val response = underTest.get<Unit>("http://localhost:65535")
+
+        assertRequestFailed(response, ClientErrorType.NetworkError)
+    }
+
+    private fun assertRequestFailed(response: WebClientResponse<*>, errorType: ClientErrorType) {
+        assertThat(response.successful).isFalse()
+        assertThat(response.errorType).isNotNull().isEqualByComparingTo(errorType)
     }
 
 }

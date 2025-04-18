@@ -26,6 +26,8 @@ open class WebClientResponse<T>(
      */
     open val responseDetails: ResponseDetails? = null,
 
+    open val errorType: ClientErrorType? = null,
+
     /**
      * In case an error has occurred, details about the error.
      */
