@@ -285,40 +285,4 @@ open class KtorWebClient(
     }
 
     protected open fun getUrl(response: HttpResponse): String = response.request.url.toString()
-
-
-    /**
-     * Listens to Server-sent events.
-     *
-     * @param url Relative or absolute URL
-     */
-    suspend fun listenToSseEvents(url: String, receivedEvent: (ServerSentEvent) -> Unit) =
-        listenToSseEventsSuspendable(url, receivedEvent)
-
-    /**
-     * Listens to Server-sent events.
-     *
-     * The same as [listenToSseEvents], but the [receivedEvent] callback supports suspend functions.
-     *
-     * @param url Relative or absolute URL
-     */
-    suspend fun listenToSseEventsSuspendable(url: String, receivedEvent: suspend (ServerSentEvent) -> Unit) {
-        try {
-            client.sse(url) {
-                while (coroutineContext.isActive) {
-                    incoming.collect { event ->
-                        val mapped = ServerSentEvent(event.data, event.event, event.id, event.retry, event.comments)
-                        receivedEvent(mapped)
-                    }
-                }
-            }
-        } catch (e: Throwable) {
-            log.error(e) { "Listening to SSE events stopped with an exception".decodeURLPart() }
-        }
-
-        if (coroutineContext.isActive) {
-            log.info { "Listening to SSE events stopped, but as Coroutine is still active restarting listening ..." }
-            listenToSseEventsSuspendable(url, receivedEvent)
-        }
-    }
 }
