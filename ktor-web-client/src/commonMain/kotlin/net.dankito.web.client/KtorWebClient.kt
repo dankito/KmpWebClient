@@ -196,29 +196,24 @@ open class KtorWebClient(
         }
     }
 
-    protected open suspend fun <T : Any> mapHttResponse(method: HttpMethod, parameters: RequestParameters<T>, httpResponse: HttpResponse): WebClientResult<T> {
-        val headers = if (config.mapResponseHeaders) httpResponse.headers.toMap() else emptyMap()
-        val cookies = if (config.mapResponseCookies) httpResponse.setCookie().map { mapCookie(it) } else emptyList()
-        val url = getUrl(httpResponse)
-        val httpVersion = httpResponse.version.let { if (it.name == "HTTP") "${it.major}.${it.minor}" else it.toString() }
+    protected open suspend fun <T : Any> mapHttResponse(method: HttpMethod, parameters: RequestParameters<T>, response: HttpResponse): WebClientResult<T> {
+        val url = getUrl(response)
 
-        val responseDetails = ResponseDetails(httpResponse.status.value, httpResponse.status.description, httpResponse.requestTime.toHttpDate(), httpResponse.responseTime.toHttpDate(),
-            httpVersion, headers, cookies, httpResponse.contentType()?.withoutParameters()?.toString(),
-            httpResponse.contentLength(), httpResponse.charset()?.name)
+        val responseDetails = KtorResponseDetails(response)
 
-        return if (httpResponse.status.isSuccess()) {
+        return if (response.status.isSuccess()) {
             try {
-                WebClientResult(url, true, responseDetails, body = decodeResponse(parameters, httpResponse))
+                WebClientResult(url, true, responseDetails, body = decodeResponse(parameters, response))
             } catch (e: Throwable) {
-                log.error(e) { "Error while mapping response of: ${method.value} ${httpResponse.request.url}, ${httpResponse.headers.toMap()}" }
+                log.error(e) { "Error while mapping response of: ${method.value} ${response.request.url}, ${response.headers.toMap()}" }
                 WebClientResult(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails))
             }
         } else {
-            val responseBody = httpResponse.bodyAsText()
+            val responseBody = response.bodyAsText()
             val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
 
             WebClientResult(url, false, responseDetails, errorType, WebClientException("The HTTP response indicated an error: " +
-                    "${httpResponse.status.value} ${httpResponse.status.description}", null, responseDetails, responseBody))
+                    "${response.status.value} ${response.status.description}", null, responseDetails, responseBody))
         }
     }
 
@@ -273,14 +268,4 @@ open class KtorWebClient(
     }
 
     protected open fun getUrl(response: HttpResponse): String = response.request.url.toString()
-
-    protected open fun mapCookie(cookie: io.ktor.http.Cookie) = Cookie(
-        cookie.name,
-        cookie.value,
-        cookie.domain,
-        cookie.path,
-        cookie.expires?.timestamp,
-        cookie.secure,
-        cookie.httpOnly
-    )
 }

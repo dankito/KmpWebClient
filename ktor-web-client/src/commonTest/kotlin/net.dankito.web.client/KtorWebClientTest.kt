@@ -1,9 +1,7 @@
 package net.dankito.web.client
 
 import assertk.assertThat
-import assertk.assertions.isEqualByComparingTo
-import assertk.assertions.isFalse
-import assertk.assertions.isNotNull
+import assertk.assertions.*
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
@@ -71,6 +69,26 @@ class KtorWebClientTest {
     private fun assertRequestFailed(response: WebClientResult<*>, errorType: ClientErrorType) {
         assertThat(response.successful).isFalse()
         assertThat(response.errorType).isNotNull().isEqualByComparingTo(errorType)
+    }
+
+
+    @Test
+    fun testLazyResponseDetailValues() = runTest {
+        val response = underTest.get<String>(Url)
+
+        assertThat(response.successful).isTrue()
+        assertThat(response.responseDetails).isNotNull()
+
+        assertThat(response.responseDetails!!.contentType).isEqualTo("text/html")
+//        assertThat(response.responseDetails!!.contentLength).isNotNull().isGreaterThan(0) // don't know why but on Linux is the Content-Length header missing
+        assertThat(response.responseDetails!!.charset).isNotNull().isNotEmpty()
+
+        assertThat(response.responseDetails!!.headers).isNotEmpty()
+        assertThat(response.responseDetails!!.cookies).isNotEmpty()
+
+        assertThat(response.responseDetails!!.requestTimeHttpDateString).isNotNull().isNotEmpty()
+        assertThat(response.responseDetails!!.responseTimeHttpDateString).isNotNull().isNotEmpty()
+        assertThat(response.responseDetails!!.httpProtocolVersion).isNotNull().isNotEmpty()
     }
 
 }

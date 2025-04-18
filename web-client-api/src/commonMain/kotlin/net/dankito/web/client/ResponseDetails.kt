@@ -5,19 +5,32 @@ open class ResponseDetails(
     val reasonPhrase: String,
 
     // TODO: map to platform independent Instance objects
-    val requestTimeHttpDateString: String? = null,
-    val responseTimeHttpDateString: String? = null,
+    requestTimeHttpDateString: String? = null,
+    responseTimeHttpDateString: String? = null,
 
-    val httpProtocolVersion: String,
+    httpProtocolVersion: String? = null,
 
-    val headers: Map<String, List<String>>,
-    val cookies: List<Cookie> = emptyList(),
+    headers: Map<String, List<String>> = emptyMap(),
+    cookies: List<Cookie> = emptyList(),
+
+    contentType: String? = null,
+    contentLength: Long? = null,
+    charset: String? = null,
+) {
+
+    open val requestTimeHttpDateString: String? = requestTimeHttpDateString
+    open val responseTimeHttpDateString: String? = responseTimeHttpDateString
+
+    open val httpProtocolVersion: String? = httpProtocolVersion
+
+    open val headers: Map<String, List<String>> = headers
+    open val cookies: List<Cookie> = cookies
 
     // parsed headers:
-    val contentType: String? = null,
-    val contentLength: Long? = null,
-    val charset: String? = null,
-) {
+    open val contentType: String? = contentType
+    open val contentLength: Long? = contentLength
+    open val charset: String? = charset
+
 
     open fun getHeaderValue(headerName: String): String? {
         val headerNameLowerCased = headerName.lowercase() // header names are case insensitive, so compare them lower cased
