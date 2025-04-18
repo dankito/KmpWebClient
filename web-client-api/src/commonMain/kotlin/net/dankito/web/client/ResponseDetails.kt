@@ -5,8 +5,8 @@ open class ResponseDetails(
     val reasonPhrase: String,
 
     // TODO: map to platform independent Instance objects
-    val requestTime: String,
-    val responseTime: String,
+    val requestTimeHttpDateString: String? = null,
+    val responseTimeHttpDateString: String? = null,
 
     val httpProtocolVersion: String,
 
