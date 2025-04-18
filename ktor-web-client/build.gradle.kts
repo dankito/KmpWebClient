@@ -86,6 +86,8 @@ kotlin {
 
     val klfVersion: String by project
 
+    val assertKVersion: String by project
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -104,6 +106,7 @@ kotlin {
                 implementation(kotlin("test"))
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+                implementation("com.willowtreeapps.assertk:assertk:$assertKVersion")
             }
         }
 
