@@ -255,8 +255,7 @@ open class KtorWebClient(
         is URLParserException -> null to ClientErrorType.ClientError
         else -> {
             val message = e.message ?: ""
-            if (message.contains("Connection failed", true) || message.contains("Connection refused", true)
-                || message.contains("Could not connect", true)) {
+            if (isNetworkError(message)) {
                 null to ClientErrorType.NetworkError
             } else if (e::class.simpleName == "InterruptedIOException") { // on JVM io.ktor.client.network.sockets.InterruptedIOException is an internal class (looks like a bug to me)
                 tryToExtractRequestedUrl(e) to ClientErrorType.Timeout
@@ -265,6 +264,11 @@ open class KtorWebClient(
             }
         }
     }
+
+    protected open fun isNetworkError(message: String) =
+        message.contains("Connection failed", true)
+                || message.contains("Connection refused", true)
+                || message.contains("Could not connect", true) // Apple systems
 
     protected open fun tryToExtractRequestedUrl(e: Throwable): String? {
         val startIndex = e.message?.indexOf("[url=")?.plus("[url=".length) ?: -1
