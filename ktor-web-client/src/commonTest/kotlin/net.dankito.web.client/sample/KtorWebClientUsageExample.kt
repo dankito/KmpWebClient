@@ -102,8 +102,8 @@ class KtorWebClientUsageExample {
         val contentType: String? = response.responseDetails?.contentType
         val contentLength: Long? = response.responseDetails?.contentLength
 
-        val requestTime = response.responseDetails?.requestTimeHttpDateString
-        val responseTime = response.responseDetails?.responseTimeHttpDateString
+        val requestTime = response.responseDetails?.requestTime
+        val responseTime = response.responseDetails?.responseTime
 
         val headers = response.responseDetails?.headers
         // only set if ClientConfig.mapResponseCookies is set to true

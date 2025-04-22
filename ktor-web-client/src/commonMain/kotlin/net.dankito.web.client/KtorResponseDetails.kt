@@ -4,14 +4,16 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
 import io.ktor.utils.io.charsets.*
+import net.dankito.datetime.Instant
+import net.dankito.web.client.util.WebDateTimeUtil
 
 open class KtorResponseDetails(
     open val response: HttpResponse,
 ) : ResponseDetails(response.status.value, response.status.description) {
 
-    override val requestTimeHttpDateString: String? by lazy { response.requestTime.toHttpDate() }
+    override val requestTime: Instant? by lazy { WebDateTimeUtil.gmtDateToInstant(response.requestTime) }
 
-    override val responseTimeHttpDateString: String? by lazy { response.responseTime.toHttpDate() }
+    override val responseTime: Instant by lazy { WebDateTimeUtil.gmtDateToInstant(response.responseTime) }
 
     override val httpProtocolVersion: String? by lazy {
         response.version.let { if (it.name == "HTTP") "${it.major}.${it.minor}" else it.toString() }

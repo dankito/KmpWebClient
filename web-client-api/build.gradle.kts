@@ -42,11 +42,11 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
 
-    val ktorVersion: String by project
+    val kmpDateTimeVersion: String by project
 
     sourceSets {
         commonMain.dependencies {
-
+            api("net.dankito.datetime:kmp-datetime:$kmpDateTimeVersion")
         }
     }
 }

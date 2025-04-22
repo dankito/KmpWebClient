@@ -1,12 +1,14 @@
 package net.dankito.web.client
 
+import net.dankito.datetime.Instant
+
 open class ResponseDetails(
     val statusCode: Int,
     val reasonPhrase: String,
 
     // TODO: map to platform independent Instance objects
-    requestTimeHttpDateString: String? = null,
-    responseTimeHttpDateString: String? = null,
+    requestTime: Instant? = null,
+    responseTime: Instant = Instant.now(),
 
     httpProtocolVersion: String? = null,
 
@@ -18,8 +20,8 @@ open class ResponseDetails(
     charset: String? = null,
 ) {
 
-    open val requestTimeHttpDateString: String? = requestTimeHttpDateString
-    open val responseTimeHttpDateString: String? = responseTimeHttpDateString
+    open val requestTime: Instant? = requestTime
+    open val responseTime: Instant = responseTime
 
     open val httpProtocolVersion: String? = httpProtocolVersion
 
