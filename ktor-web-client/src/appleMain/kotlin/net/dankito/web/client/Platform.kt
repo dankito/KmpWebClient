@@ -2,12 +2,14 @@ package net.dankito.web.client
 
 import io.ktor.client.*
 import io.ktor.client.engine.darwin.*
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import platform.Foundation.*
 
+@OptIn(UnsafeNumber::class, ExperimentalForeignApi::class, BetaInteropApi::class)
 actual object Platform {
 
-    @OptIn(UnsafeNumber::class)
     actual fun createPlatformSpecificHttpClient(
         ignoreCertificateErrors: Boolean,
         config: HttpClientConfig<*>.() -> Unit
