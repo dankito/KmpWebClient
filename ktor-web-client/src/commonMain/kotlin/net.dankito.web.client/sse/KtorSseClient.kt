@@ -34,8 +34,12 @@ open class KtorSseClient(
             client.sse(url) {
                 while (scope.isActive) {
                     incoming.collect { event ->
-                        val mapped = ServerSentEvent(event.data, event.event, event.id, event.retry, event.comments)
-                        receivedEvent(mapped)
+                        try {
+                            val mapped = ServerSentEvent(event.data, event.event, event.id, event.retry, event.comments)
+                            receivedEvent(mapped)
+                        } catch (e: Throwable) {
+                            log.error(e) { "Handling received SSE event failed: $event" }
+                        }
                     }
                 }
             }
