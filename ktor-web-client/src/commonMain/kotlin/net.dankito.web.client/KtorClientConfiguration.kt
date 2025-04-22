@@ -4,6 +4,8 @@ import net.codinux.log.logger
 
 object KtorClientConfiguration {
 
+    var logUsedEngine = false
+
     private val log by logger()
 
 
@@ -11,7 +13,11 @@ object KtorClientConfiguration {
         val supportedEngines = Platform.preferredEngines
 
         return Platform.availableEngines.firstOrNull { supportedEngines.contains(it) }.also {
-            log.debug { "Using HTTP Client Engine ${it?.engineName}" }
+            if (logUsedEngine) {
+                log.info { "Using HTTP Client Engine ${it?.engineName}" }
+            } else {
+                log.debug { "Using HTTP Client Engine ${it?.engineName}" }
+            }
         }
     }
 
