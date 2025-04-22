@@ -5,6 +5,8 @@ import io.ktor.client.engine.winhttp.*
 
 actual object Platform {
 
+    actual val availableEngines: LinkedHashSet<KtorEngine> = NativePlatformCommon.availableEngines
+
     actual fun createPlatformSpecificHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient? {
         val engine = NativePlatformCommon.getFirstOfSupportedHttpClient(KtorEngine.WinHttp)
 

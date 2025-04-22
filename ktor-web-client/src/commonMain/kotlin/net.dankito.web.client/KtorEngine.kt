@@ -6,6 +6,7 @@ enum class KtorEngine(val engineName: String) {
     Curl("Curl"),
     Darwin("Darwin"),
     WinHttp("WinHttp"),
+    Js("Js"),
     OkHttp("OkHttp"),
     Java("Java"),
     Apache("Apache"),

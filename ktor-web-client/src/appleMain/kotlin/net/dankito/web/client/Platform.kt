@@ -10,6 +10,8 @@ import platform.Foundation.*
 @OptIn(UnsafeNumber::class, ExperimentalForeignApi::class, BetaInteropApi::class)
 actual object Platform {
 
+    actual val availableEngines: LinkedHashSet<KtorEngine> = NativePlatformCommon.availableEngines // or linkedSetOf(KtorEngine.Darwin) ?
+
     actual fun createPlatformSpecificHttpClient(
         ignoreCertificateErrors: Boolean,
         config: HttpClientConfig<*>.() -> Unit
