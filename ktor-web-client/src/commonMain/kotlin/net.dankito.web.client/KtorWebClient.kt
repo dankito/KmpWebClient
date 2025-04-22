@@ -258,6 +258,7 @@ open class KtorWebClient(
     protected open fun isNetworkError(message: String) =
         message.contains("Connection failed", true)
                 || message.contains("Connection refused", true)
+                || message.contains("Fail to fetch", true) // JS
                 || message.contains("Could not connect", true) // Apple systems
 
     protected open fun tryToExtractRequestedUrl(e: Throwable): String? {
