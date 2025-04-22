@@ -8,7 +8,7 @@ interface SseClient {
      *
      * @param url Relative or absolute URL
      */
-    suspend fun listenToSseEvents(url: String, receivedEvent: (ServerSentEvent) -> Unit)
+    suspend fun listenToSseEvents(url: String, receivedEvent: (ServerSentEvent) -> Unit): SseConnection
 
     /**
      * Listens to Server-sent events.
@@ -17,6 +17,6 @@ interface SseClient {
      *
      * @param url Relative or absolute URL
      */
-    suspend fun listenToSseEventsSuspendable(url: String, receivedEvent: suspend (ServerSentEvent) -> Unit)
+    suspend fun listenToSseEventsSuspendable(url: String, receivedEvent: suspend (ServerSentEvent) -> Unit): SseConnection
 
 }
