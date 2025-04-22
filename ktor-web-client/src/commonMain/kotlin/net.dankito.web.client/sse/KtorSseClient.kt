@@ -7,7 +7,8 @@ import kotlinx.coroutines.*
 import net.codinux.log.logger
 
 open class KtorSseClient(
-    protected val client: HttpClient
+    protected val client: HttpClient,
+    protected val logStatusInformation: Boolean = false
 ) : SseClient {
 
     protected val log by logger()
@@ -24,7 +25,11 @@ open class KtorSseClient(
             listenToSseEventsRetryable(url, scope, receivedEvent)
         }
 
-        log.info { "Started listening to server-sent events at $url" }
+        if (logStatusInformation) {
+            log.info { "Started listening to server-sent events at $url" }
+        } else {
+            log.debug { "Started listening to server-sent events at $url" }
+        }
 
         return KtorSseConnection(scope, job)
     }
@@ -48,11 +53,19 @@ open class KtorSseClient(
                 return
             }
 
-            log.error(e) { "Listening to SSE events stopped with an exception".decodeURLPart() }
+            if (logStatusInformation) {
+                log.error(e) { "Listening to SSE events stopped with an exception".decodeURLPart() }
+            } else {
+                log.debug(e) { "Listening to SSE events stopped with an exception".decodeURLPart() }
+            }
         }
 
         if (scope.isActive) {
-            log.info { "Listening to SSE events stopped, but as Coroutine is still active restarting listening ..." }
+            if (logStatusInformation) {
+                log.info { "Listening to SSE events stopped, but as Coroutine is still active restarting listening ..." }
+            } else {
+                log.debug { "Listening to SSE events stopped, but as Coroutine is still active restarting listening ..." }
+            }
             listenToSseEventsSuspendable(url, receivedEvent)
         }
     }
