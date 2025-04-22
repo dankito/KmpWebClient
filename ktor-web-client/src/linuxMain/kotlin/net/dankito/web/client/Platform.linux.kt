@@ -11,7 +11,7 @@ actual object Platform {
 
 
     actual fun createPlatformSpecificHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient? {
-        val engine = NativePlatformCommon.getFirstOfSupportedHttpClient(KtorEngine.Curl)
+        val engine = KtorClientConfiguration.getFirstOfSupportedHttpClient()
 
         return when (engine) {
             // iOS, ... crashes when ktor-curl is added to dependencies so we need a special handling here
