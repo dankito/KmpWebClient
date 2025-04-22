@@ -2,6 +2,7 @@ package net.dankito.web.client.sse
 
 import io.ktor.client.*
 import io.ktor.client.plugins.sse.*
+import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.*
 import net.codinux.log.logger
@@ -22,7 +23,7 @@ open class KtorSseClient(
         val scope = CoroutineScope(Dispatchers.Default + job)
 
         scope.launch {
-            listenToSseEventsRetryable(url, scope, receivedEvent)
+            listenToSseEventsRetryable(url, scope, null, receivedEvent)
         }
 
         if (logStatusInformation) {
@@ -34,12 +35,16 @@ open class KtorSseClient(
         return KtorSseConnection(scope, job)
     }
 
-    protected open suspend fun listenToSseEventsRetryable(url: String, scope: CoroutineScope, receivedEvent: suspend (ServerSentEvent) -> Unit) {
+    protected open suspend fun listenToSseEventsRetryable(url: String, scope: CoroutineScope, lastReceivedEventId: String? = null, receivedEvent: suspend (ServerSentEvent) -> Unit) {
+        var lastEventId: String? = null
+
         try {
-            client.sse(url) {
+            client.sse(url, { createSseRequest(url, lastReceivedEventId)}) {
                 while (scope.isActive) {
                     incoming.collect { event ->
                         try {
+                            event.id?.takeUnless { it.isBlank() }?.let { lastEventId = it }
+
                             val mapped = ServerSentEvent(event.data, event.event, event.id, event.retry, event.comments)
                             receivedEvent(mapped)
                         } catch (e: Throwable) {
@@ -62,11 +67,17 @@ open class KtorSseClient(
 
         if (scope.isActive) {
             if (logStatusInformation) {
-                log.info { "Listening to SSE events stopped, but as Coroutine is still active restarting listening ..." }
+                log.info { "Listening to SSE events stopped, but as Coroutine is still active restarting listening with lastEventId $lastEventId ..." }
             } else {
-                log.debug { "Listening to SSE events stopped, but as Coroutine is still active restarting listening ..." }
+                log.debug { "Listening to SSE events stopped, but as Coroutine is still active restarting listening with lastEventId $lastEventId ..." }
             }
             listenToSseEventsRetryable(url, scope, receivedEvent)
+        }
+    }
+
+    protected open fun createSseRequest(urlString: String, lastReceivedEventId: String? = null) = HttpRequestBuilder().apply {
+        lastReceivedEventId?.let {
+            header("Last-Event-ID", it)
         }
     }
 
