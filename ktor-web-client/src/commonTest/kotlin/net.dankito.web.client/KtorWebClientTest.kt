@@ -79,16 +79,18 @@ class KtorWebClientTest {
         assertThat(response.successful).isTrue()
         assertThat(response.responseDetails).isNotNull()
 
-        assertThat(response.responseDetails!!.contentType).isEqualTo("text/html")
-//        assertThat(response.responseDetails!!.contentLength).isNotNull().isGreaterThan(0) // don't know why but on Linux is the Content-Length header missing
-        assertThat(response.responseDetails!!.charset).isNotNull().isNotEmpty()
+        val details = response.responseDetails!!
+        assertThat(details.contentType).isEqualTo("text/html")
+//        assertThat(details.contentLength).isNotNull().isGreaterThan(0) // don't know why but on Linux is the Content-Length header missing
+        assertThat(details.charset).isNotNull().isNotEmpty()
 
-        assertThat(response.responseDetails!!.headers).isNotEmpty()
-        assertThat(response.responseDetails!!.cookies).isNotEmpty()
+        assertThat(details.headers).isNotEmpty()
+        assertThat(details.cookies).isNotEmpty()
 
-        assertThat(response.responseDetails!!.requestTimeHttpDateString).isNotNull().isNotEmpty()
-        assertThat(response.responseDetails!!.responseTimeHttpDateString).isNotNull().isNotEmpty()
-        assertThat(response.responseDetails!!.httpProtocolVersion).isNotNull().isNotEmpty()
+        assertThat(details.requestTime).isNotNull()
+        assertThat(details.responseTime.epochSeconds).isGreaterThan(1_745_000_000)
+        assertThat(details.responseTime.toEpochMilliseconds()).isGreaterThanOrEqualTo(details.requestTime!!.toEpochMilliseconds())
+        assertThat(details.httpProtocolVersion).isNotNull().isNotEmpty()
     }
 
 }
