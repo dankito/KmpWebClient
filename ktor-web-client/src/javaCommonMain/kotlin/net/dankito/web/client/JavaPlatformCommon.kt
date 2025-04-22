@@ -44,9 +44,9 @@ object JavaPlatformCommon {
 
     fun getPlatformSpecificPreferredEngines(): List<KtorEngine> =
         if (isRunningOnAndroid) {
-            listOf(KtorEngine.Android, KtorEngine.CIO, KtorEngine.OkHttp)
+            listOf(KtorEngine.Android, KtorEngine.OkHttp, KtorEngine.CIO) // list default engine last so that including a different engine dependency overwrites default engine
         } else {
-            listOf(KtorEngine.Java, KtorEngine.CIO, KtorEngine.OkHttp, KtorEngine.Apache, KtorEngine.Jetty)
+            listOf(KtorEngine.Java, KtorEngine.OkHttp, KtorEngine.Apache, KtorEngine.Jetty, KtorEngine.CIO) // list default engine last so that including a different engine dependency overwrites default engine
         }
 
     val isRunningOnAndroid by lazy { isClassAvailable("android.content.Context") }
