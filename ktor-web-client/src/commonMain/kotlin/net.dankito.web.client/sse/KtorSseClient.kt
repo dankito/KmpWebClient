@@ -66,7 +66,7 @@ open class KtorSseClient(
             } else {
                 log.debug { "Listening to SSE events stopped, but as Coroutine is still active restarting listening ..." }
             }
-            listenToSseEventsSuspendable(url, receivedEvent)
+            listenToSseEventsRetryable(url, scope, receivedEvent)
         }
     }
 
