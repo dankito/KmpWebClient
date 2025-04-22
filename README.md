@@ -1,5 +1,6 @@
 # Kotlin (Multiplatform) Web Client
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.dankito.web/ktor-web-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.dankito.web/ktor-web-client)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 In so many projects I need a web client. 
 
