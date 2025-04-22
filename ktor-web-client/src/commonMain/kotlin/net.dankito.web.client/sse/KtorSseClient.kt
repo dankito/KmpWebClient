@@ -24,6 +24,8 @@ open class KtorSseClient(
             listenToSseEventsRetryable(url, scope, receivedEvent)
         }
 
+        log.info { "Started listening to server-sent events at $url" }
+
         return KtorSseConnection(scope, job)
     }
 
