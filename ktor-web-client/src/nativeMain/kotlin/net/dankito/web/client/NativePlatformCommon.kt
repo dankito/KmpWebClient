@@ -10,8 +10,4 @@ object NativePlatformCommon {
         KtorEngine.entries.firstOrNull { name -> container.toString() == name.engineName }
     }.toCollection(LinkedHashSet())
 
-
-    fun getFirstOfSupportedHttpClient(vararg supportedEngines: KtorEngine): KtorEngine? =
-        availableEngines.firstOrNull { supportedEngines.contains(it) }
-
 }

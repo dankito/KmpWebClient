@@ -19,7 +19,7 @@ object JavaPlatformCommon {
 
 
     fun createPlatformSpecificHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient? =
-        createHttpClient(getFirstOfSupportedHttpClient(Platform.preferredEngines), ignoreCertificateErrors, config)
+        createHttpClient(KtorClientConfiguration.getFirstOfSupportedHttpClient(), ignoreCertificateErrors, config)
 
     fun createHttpClient(engine: KtorEngine?, ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit) =
         when (engine) {
@@ -31,8 +31,5 @@ object JavaPlatformCommon {
             KtorEngine.Android -> clientCreator.createAndroidHttpClient(ignoreCertificateErrors, config)
             else -> clientCreator.createDefaultHttpClient(config)
         }
-
-    fun getFirstOfSupportedHttpClient(supportedEngines: List<KtorEngine>): KtorEngine? =
-        availableEngines.firstOrNull { supportedEngines.contains(it) }
 
 }

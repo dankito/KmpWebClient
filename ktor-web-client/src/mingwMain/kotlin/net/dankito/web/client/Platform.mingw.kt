@@ -11,7 +11,7 @@ actual object Platform {
 
 
     actual fun createPlatformSpecificHttpClient(ignoreCertificateErrors: Boolean, config: HttpClientConfig<*>.() -> Unit): HttpClient? {
-        val engine = NativePlatformCommon.getFirstOfSupportedHttpClient(KtorEngine.WinHttp)
+        val engine = KtorClientConfiguration.getFirstOfSupportedHttpClient()
 
         return when (engine) {
             KtorEngine.WinHttp -> createWinHttpClient(ignoreCertificateErrors, config)
