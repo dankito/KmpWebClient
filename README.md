@@ -31,6 +31,16 @@ implementation("net.dankito.web:ktor2-web-client:1.1.0")
 </dependency>
 ```
 
+### Maven
+
+```xml
+<dependency>
+   <groupId>net.dankito.web</groupId>
+   <artifactId>ktor-web-client-jvm</artifactId>
+   <version>1.1.0</version>
+</dependency>
+```
+
 Or if you only want to have the API (see [Usage](#usage)) and implement the HTTP client by yourself, simply replace `ktor-web-client` with `web-client-api`.
 
 
