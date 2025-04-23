@@ -18,7 +18,7 @@ and I am ready to go to implement the domain specific code:
 ### Gradle
 
 ```
-implementation("net.dankito.web:ktor-web-client:1.0.0")
+implementation("net.dankito.web:ktor-web-client:1.1.0")
 ```
 
 Or if you only want to have the API (see [Usage](#usage)) and implement the HTTP client by yourself, simply replace `ktor-web-client` with `web-client-api`.
