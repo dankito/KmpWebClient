@@ -18,7 +18,7 @@ and I am ready to go to implement the domain specific code:
 ### Gradle
 
 ```
-implementation("net.dankito.web:ktor2-web-client:1.0.0")
+implementation("net.dankito.web:ktor2-web-client:1.1.0")
 ```
 
 ### Maven
@@ -26,7 +26,7 @@ implementation("net.dankito.web:ktor2-web-client:1.0.0")
 ```xml
 <dependency>
    <groupId>net.dankito.web</groupId>
-   <artifactId>ktor-web-client-jvm</artifactId>
+   <artifactId>ktor2-web-client-jvm</artifactId>
    <version>1.1.0</version>
 </dependency>
 ```
