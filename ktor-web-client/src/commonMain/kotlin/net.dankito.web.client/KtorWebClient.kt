@@ -6,6 +6,7 @@ import io.ktor.client.network.sockets.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
+import io.ktor.client.plugins.compression.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -42,8 +43,9 @@ open class KtorWebClient(
         customClientConfig: ((HttpClientConfig<*>, config: ClientConfig) -> Unit)? = null,
         defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
         defaultContentType: String = ContentTypes.JSON,
+        enableBodyCompression: Boolean = false,
         customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
-    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType), customClientCreator)
+    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType, enableBodyCompression), customClientCreator)
 
 
     companion object {
@@ -72,6 +74,13 @@ open class KtorWebClient(
         clientConfig.apply {
             install(ContentNegotiation) {
                 json()
+            }
+
+            if (config.enableBodyCompression) {
+                install(ContentEncoding) {
+                    gzip(1.0F)
+                    deflate(0.9F)
+                }
             }
 
             install(HttpTimeout) {
