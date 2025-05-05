@@ -9,6 +9,8 @@ class KtorWebClientTest {
 
     companion object {
         private val Url = "https://staging.dankito.net/request-logger"
+
+        private const val Body = "Just a test, no animals have been harmed"
     }
 
 
@@ -51,6 +53,64 @@ class KtorWebClientTest {
         assertEquals(204, response.statusCode)
         assertThat(response.body is Unit).isTrue()
     }
+
+
+    @Test
+    fun post() = runTest {
+        val response = underTest.post<String>(Url, Body)
+
+        assertTrue(response.successful)
+        assertEquals(200, response.statusCode)
+        assertThat(response.body).isEqualTo(Body)
+    }
+
+    @Test
+    fun postWithParameters() = runTest {
+        val response = underTest.post(RequestParameters(Url, String::class, Body))
+
+        assertTrue(response.successful)
+        assertEquals(200, response.statusCode)
+        assertThat(response.body).isEqualTo(Body)
+    }
+
+
+    @Test
+    fun put() = runTest {
+        val response = underTest.put<String>(Url, Body)
+
+        assertTrue(response.successful)
+        assertEquals(200, response.statusCode)
+        assertThat(response.body).isEqualTo(Body)
+    }
+
+    @Test
+    fun putWithParameters() = runTest {
+        val response = underTest.put(RequestParameters(Url, String::class, Body))
+
+        assertTrue(response.successful)
+        assertEquals(200, response.statusCode)
+        assertThat(response.body).isEqualTo(Body)
+    }
+
+
+    @Test
+    fun delete() = runTest {
+        val response = underTest.delete<Unit>(Url)
+
+        assertTrue(response.successful)
+        assertEquals(204, response.statusCode)
+        assertThat(response.body is Unit).isTrue()
+    }
+
+    @Test
+    fun deleteWithParameters() = runTest {
+        val response = underTest.delete(RequestParameters(Url, Unit::class))
+
+        assertTrue(response.successful)
+        assertEquals(204, response.statusCode)
+        assertThat(response.body is Unit).isTrue()
+    }
+
 
     @Test
     fun timeout() = runTest {
