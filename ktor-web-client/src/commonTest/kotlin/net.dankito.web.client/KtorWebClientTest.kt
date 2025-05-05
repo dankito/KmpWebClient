@@ -21,18 +21,14 @@ class KtorWebClientTest {
     fun get() = runTest {
         val response = underTest.get<String>(Url)
 
-        assertTrue(response.successful)
-        assertEquals(204, response.statusCode)
-        assertThat(response.body).isNotNull().isEmpty()
+        assertSuccessGetResponse(response)
     }
 
     @Test
     fun getWithParameters() = runTest {
         val response = underTest.get(RequestParameters(Url, String::class))
 
-        assertTrue(response.successful)
-        assertEquals(204, response.statusCode)
-        assertThat(response.body).isNotNull().isEmpty()
+        assertSuccessGetResponse(response)
     }
 
 
@@ -40,18 +36,14 @@ class KtorWebClientTest {
     fun head() = runTest {
         val response = underTest.head(Url)
 
-        assertTrue(response.successful)
-        assertEquals(204, response.statusCode)
-        assertThat(response.body is Unit).isTrue()
+        assertNoContentResponse(response)
     }
 
     @Test
     fun headWithParameters() = runTest {
         val response = underTest.head(RequestParameters(Url, Unit::class))
 
-        assertTrue(response.successful)
-        assertEquals(204, response.statusCode)
-        assertThat(response.body is Unit).isTrue()
+        assertNoContentResponse(response)
     }
 
 
@@ -59,18 +51,14 @@ class KtorWebClientTest {
     fun post() = runTest {
         val response = underTest.post<String>(Url, Body)
 
-        assertTrue(response.successful)
-        assertEquals(200, response.statusCode)
-        assertThat(response.body).isEqualTo(Body)
+        assertSuccessResponseWithBody(response)
     }
 
     @Test
     fun postWithParameters() = runTest {
         val response = underTest.post(RequestParameters(Url, String::class, Body))
 
-        assertTrue(response.successful)
-        assertEquals(200, response.statusCode)
-        assertThat(response.body).isEqualTo(Body)
+        assertSuccessResponseWithBody(response)
     }
 
 
@@ -78,18 +66,14 @@ class KtorWebClientTest {
     fun put() = runTest {
         val response = underTest.put<String>(Url, Body)
 
-        assertTrue(response.successful)
-        assertEquals(200, response.statusCode)
-        assertThat(response.body).isEqualTo(Body)
+        assertSuccessResponseWithBody(response)
     }
 
     @Test
     fun putWithParameters() = runTest {
         val response = underTest.put(RequestParameters(Url, String::class, Body))
 
-        assertTrue(response.successful)
-        assertEquals(200, response.statusCode)
-        assertThat(response.body).isEqualTo(Body)
+        assertSuccessResponseWithBody(response)
     }
 
 
@@ -97,18 +81,14 @@ class KtorWebClientTest {
     fun delete() = runTest {
         val response = underTest.delete<Unit>(Url)
 
-        assertTrue(response.successful)
-        assertEquals(204, response.statusCode)
-        assertThat(response.body is Unit).isTrue()
+        assertNoContentResponse(response)
     }
 
     @Test
     fun deleteWithParameters() = runTest {
         val response = underTest.delete(RequestParameters(Url, Unit::class))
 
-        assertTrue(response.successful)
-        assertEquals(204, response.statusCode)
-        assertThat(response.body is Unit).isTrue()
+        assertNoContentResponse(response)
     }
 
 
@@ -124,11 +104,6 @@ class KtorWebClientTest {
         val response = underTest.get<Unit>("http://localhost:65535")
 
         assertRequestFailed(response, ClientErrorType.NetworkError)
-    }
-
-    private fun assertRequestFailed(response: WebClientResult<*>, errorType: ClientErrorType) {
-        assertThat(response.successful).isFalse()
-        assertThat(response.errorType).isNotNull().isEqualByComparingTo(errorType)
     }
 
 
@@ -151,6 +126,30 @@ class KtorWebClientTest {
         assertThat(details.responseTime.epochSeconds).isGreaterThan(1_745_000_000)
         assertThat(details.responseTime.toEpochMilliseconds()).isGreaterThanOrEqualTo(details.requestTime!!.toEpochMilliseconds())
         assertThat(details.httpProtocolVersion).isNotNull().isNotEmpty()
+    }
+
+
+    private fun assertNoContentResponse(response: WebClientResult<Unit>) {
+        assertThat(response.successful).isTrue()
+        assertThat(response.statusCode).isEqualTo(204)
+        assertThat(response.body is Unit).isTrue()
+    }
+
+    private fun assertSuccessGetResponse(response: WebClientResult<String>) {
+        assertThat(response.successful).isTrue()
+        assertThat(response.statusCode).isEqualTo(204)
+        assertThat(response.body).isNotNull()
+    }
+
+    private fun assertSuccessResponseWithBody(response: WebClientResult<String>, expectedBody: String = Body) {
+        assertThat(response.successful).isTrue()
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo(expectedBody)
+    }
+
+    private fun assertRequestFailed(response: WebClientResult<*>, errorType: ClientErrorType) {
+        assertThat(response.successful).isFalse()
+        assertThat(response.errorType).isNotNull().isEqualByComparingTo(errorType)
     }
 
 }
