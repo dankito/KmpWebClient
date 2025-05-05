@@ -134,15 +134,15 @@ class KtorWebClientTest {
 
     @Test
     fun testLazyResponseDetailValues() = runTest {
-        val response = underTest.get<String>(Url)
+        val response = underTest.post(RequestParameters(Url, String::class, Body, "text/plain; charset=UTF-8"))
 
         assertThat(response.successful).isTrue()
         assertThat(response.responseDetails).isNotNull()
 
         val details = response.responseDetails!!
-//        assertThat(details.contentType).isEqualTo("text/html")
-////        assertThat(details.contentLength).isNotNull().isGreaterThan(0) // don't know why but on Linux is the Content-Length header missing
-//        assertThat(details.charset).isNotNull().isNotEmpty()
+        assertThat(details.contentType).isEqualTo("text/plain")
+        assertThat(details.contentLength).isNotNull().isEqualTo(40)
+        assertThat(details.charset).isEqualTo("UTF-8")
 
         assertThat(details.headers).isNotEmpty()
         assertThat(details.cookies).isEmpty()
