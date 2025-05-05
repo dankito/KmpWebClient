@@ -19,6 +19,11 @@ open class ClientConfig(
 
     open val defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
     open val defaultContentType: String = ContentTypes.JSON,
+    /**
+     * Enables compression of response bodies if server supports it. This is supported by Ktor 2 and 3.
+     *
+     * Compression of request bodies is only supported by Ktor 3. See also [RequestParameters.compressBodyIfSupported].
+     */
     open val enableBodyCompression: Boolean = false,
 
     // JS doesn't support connectTimeout and socketTimeout

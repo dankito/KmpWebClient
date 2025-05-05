@@ -10,6 +10,12 @@ open class RequestParameters<T : Any>(
     open val accept: String? = null,
     open val headers: Map<String, String> = mutableMapOf(),
     open val queryParameters: Map<String, Any> = mapOf(),
+    /**
+     * If set to `true` or [ClientConfig.enableBodyCompression] is set to `true` compresses request body if supported.
+     *
+     * Currently only Ktor 3 supports request body compression.
+     */
+    open val compressBodyIfSupported: Boolean = false,
     open val cookies: List<Cookie> = mutableListOf(),
     open val userAgent: String? = DefaultUserAgent,
     open val connectTimeoutMillis: Long? = null,

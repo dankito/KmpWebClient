@@ -75,6 +75,7 @@ class KtorWebClientUsageExample {
 
             headers = mapOf("Connection" to "keep-alive"),
             queryParameters = mapOf("enabled" to "true"),
+            compressBodyIfSupported = false,
 
             cookies = listOf(Cookie("cookie_name", "cookie_value")),
             userAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.3",
