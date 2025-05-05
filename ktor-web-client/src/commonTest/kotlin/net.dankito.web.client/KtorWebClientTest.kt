@@ -21,14 +21,14 @@ class KtorWebClientTest {
     fun get() = runTest {
         val response = underTest.get<String>(Url)
 
-        assertSuccessGetResponse(response)
+        assertSuccessGetOrDeleteResponse(response)
     }
 
     @Test
     fun getWithParameters() = runTest {
         val response = underTest.get(RequestParameters(Url, String::class))
 
-        assertSuccessGetResponse(response)
+        assertSuccessGetOrDeleteResponse(response)
     }
 
 
@@ -79,16 +79,16 @@ class KtorWebClientTest {
 
     @Test
     fun delete() = runTest {
-        val response = underTest.delete<Unit>(Url)
+        val response = underTest.delete<String>(Url)
 
-        assertNoContentResponse(response)
+        assertSuccessGetOrDeleteResponse(response)
     }
 
     @Test
     fun deleteWithParameters() = runTest {
-        val response = underTest.delete(RequestParameters(Url, Unit::class))
+        val response = underTest.delete(RequestParameters(Url, String::class))
 
-        assertNoContentResponse(response)
+        assertSuccessGetOrDeleteResponse(response)
     }
 
 
@@ -135,10 +135,10 @@ class KtorWebClientTest {
         assertThat(response.body is Unit).isTrue()
     }
 
-    private fun assertSuccessGetResponse(response: WebClientResult<String>) {
+    private fun assertSuccessGetOrDeleteResponse(response: WebClientResult<String>) {
         assertThat(response.successful).isTrue()
-        assertThat(response.statusCode).isEqualTo(204)
-        assertThat(response.body).isNotNull()
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isNotNull().isNotEmpty()
     }
 
     private fun assertSuccessResponseWithBody(response: WebClientResult<String>, expectedBody: String = Body) {
