@@ -8,7 +8,7 @@ import kotlin.test.*
 class KtorWebClientTest {
 
     companion object {
-        private val Url = "https://staging.dankito.net/request-logger/KtorWebClientTest"
+        private val Url = "https://staging.dankito.net/echo/KtorWebClientTest"
 
         private const val Body = "Just a test, no animals have been harmed"
     }
