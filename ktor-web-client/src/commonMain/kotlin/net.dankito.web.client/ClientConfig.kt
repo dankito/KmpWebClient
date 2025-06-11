@@ -19,6 +19,7 @@ open class ClientConfig(
 
     open val defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
     open val defaultContentType: String = ContentTypes.JSON,
+    open val defaultAccept: String = ContentTypes.JSON,
     /**
      * Enables compression of response bodies if server supports it. This is supported by Ktor 2 and 3.
      *

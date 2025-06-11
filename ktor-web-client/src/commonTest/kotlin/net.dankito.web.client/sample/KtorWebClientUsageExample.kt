@@ -42,6 +42,8 @@ class KtorWebClientUsageExample {
                 // the ContentType HTTP header that should be used if request specifies a body but no content type (defaults to "application/json; charset=UTF-8")
                 defaultContentType = "application/json; charset=UTF-8",
 
+                defaultAccept = ContentTypes.JSON,
+
                 enableBodyCompression = false,
 
                 // the connect timeout in milliseconds for all requests of this HTTP client (if not overwritten in RequestParameters). Defaults to 5 seconds.

@@ -45,9 +45,10 @@ open class KtorWebClient(
         customClientConfig: ((HttpClientConfig<*>, config: ClientConfig) -> Unit)? = null,
         defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
         defaultContentType: String = ContentTypes.JSON,
+        defaultAccept: String = ContentTypes.JSON,
         enableBodyCompression: Boolean = false,
         customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
-    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType, enableBodyCompression), customClientCreator)
+    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType, defaultAccept, enableBodyCompression), customClientCreator)
 
 
     companion object {
@@ -199,9 +200,7 @@ open class KtorWebClient(
                 this.userAgent(it)
             }
 
-            parameters.accept?.let {
-                this.accept(ContentType.parse(it))
-            }
+            this.accept(ContentType.parse(parameters.accept ?: config.defaultAccept))
 
             timeout {
                 // JS doesn't support connectTimeout and socketTimeout
