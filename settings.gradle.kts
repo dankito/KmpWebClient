@@ -10,8 +10,10 @@ pluginManagement {
 
     plugins {
         kotlin("multiplatform") version kotlinVersion apply false
+        kotlin("jvm") version kotlinVersion apply false
     }
 }
+
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
 }
@@ -21,4 +23,5 @@ rootProject.name = "KmpWebClient"
 
 
 include("web-client-api")
-include(":ktor-web-client")
+include("ktor-web-client")
+include("java-http-client-web-client")
