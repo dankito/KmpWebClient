@@ -130,26 +130,26 @@ class KtorWebClientTest {
 
 
     private fun assertNoContentResponse(response: WebClientResult<Unit>) {
-        assertThat(response.successful).isTrue()
-        assertThat(response.statusCode).isEqualTo(204)
+        assertThat(response::successful).isTrue()
+        assertThat(response::statusCode).isEqualTo(204)
         assertThat(response.body is Unit).isTrue()
     }
 
     private fun assertSuccessGetOrDeleteResponse(response: WebClientResult<String>) {
-        assertThat(response.successful).isTrue()
-        assertThat(response.statusCode).isEqualTo(200)
-        assertThat(response.body).isNotNull().isNotEmpty()
+        assertThat(response::successful).isTrue()
+        assertThat(response::statusCode).isEqualTo(200)
+        assertThat(response::body).isNotNull().isNotEmpty()
     }
 
     private fun assertSuccessResponseWithBody(response: WebClientResult<String>, expectedBody: String = Body) {
-        assertThat(response.successful).isTrue()
-        assertThat(response.statusCode).isEqualTo(200)
-        assertThat(response.body).isEqualTo(expectedBody)
+        assertThat(response::successful).isTrue()
+        assertThat(response::statusCode).isEqualTo(200)
+        assertThat(response::body).isEqualTo(expectedBody)
     }
 
     private fun assertRequestFailed(response: WebClientResult<*>, errorType: ClientErrorType) {
-        assertThat(response.successful).isFalse()
-        assertThat(response.errorType).isNotNull().isEqualByComparingTo(errorType)
+        assertThat(response::successful).isFalse()
+        assertThat(response::errorType).isNotNull().isEqualByComparingTo(errorType)
     }
 
 }
