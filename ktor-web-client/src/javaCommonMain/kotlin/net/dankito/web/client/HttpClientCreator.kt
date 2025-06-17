@@ -7,9 +7,14 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.engine.java.*
 import io.ktor.client.engine.jetty.*
 import io.ktor.client.engine.okhttp.*
+import net.codinux.log.JvmDefaults.isClassAvailable
+import net.codinux.log.Log
 import org.eclipse.jetty.util.ssl.SslContextFactory
 
 open class HttpClientCreator {
+
+    protected val supportsJavaHttpClientSslContext: Boolean by lazy { isClassAvailable("javax.net.ssl.SSLContext") }
+
 
     /**
      * If you call the HttpClient constructor without an argument, the client will choose an engine
@@ -76,7 +81,11 @@ open class HttpClientCreator {
             engine {
                 config {
                     if (ignoreCertificateErrors) {
-                        sslContext(SslSettings.trustAllCertificatesSslContext)
+                        if (supportsJavaHttpClientSslContext) {
+                            sslContext(SslSettings.trustAllCertificatesSslContext)
+                        } else {
+                            Log.info { "ignoreCertificateErrors is set to true but configuring Java HttpClient's SSLContext is only available on Java 11 and higher." }
+                        }
                     }
                 }
             }
