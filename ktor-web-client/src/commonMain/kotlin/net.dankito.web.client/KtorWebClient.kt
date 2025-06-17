@@ -84,8 +84,8 @@ open class KtorWebClient(
 
             if (config.enableBodyCompression) {
                 install(ContentEncoding) {
-                    gzip(1.0F)
-                    deflate(0.9F)
+                    gzip()
+                    deflate()
                 }
             }
 
