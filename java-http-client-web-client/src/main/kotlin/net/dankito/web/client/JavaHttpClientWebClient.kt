@@ -27,8 +27,7 @@ open class JavaHttpClientWebClient(
             connectTimeout(Duration.ofMillis(it))
 
             if (config.ignoreCertificateErrors) {
-                // TODO
-//                sslContext(CertificateTrustManager.createSslContextForCertificate(kubeApiCertificate, stateLogger))
+                sslContext(SslSettings.trustAllCertificatesSslContext)
             }
         }
     }.build()
