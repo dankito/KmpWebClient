@@ -26,6 +26,20 @@ open class ResponseDetails(
     open val httpProtocolVersion: String? = httpProtocolVersion
 
     open val headers: Map<String, List<String>> = headers
+
+    /**
+     * Maps header names to first header value.
+     *
+     * For some headers there may be more than one value, e.g. Set-Cookie.
+     * In this case the first value is returned.
+     *
+     * But for most headers there's only one value, e.g. Content-Type.
+     * In this case the value itself is returned.
+     *
+     * Key of returned Map<String, String> is the header name and value is the first header value.
+     */
+    open val headersFirstValue: Map<String, String> by lazy { this.headers.mapValues { it.value.first() } }
+
     open val cookies: List<Cookie> = cookies
 
     // parsed headers:
