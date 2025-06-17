@@ -28,7 +28,7 @@ kotlin {
         }
     }
 
-    js(IR) {
+    js {
         moduleName = "ktorwebclient"
         binaries.library()
 
