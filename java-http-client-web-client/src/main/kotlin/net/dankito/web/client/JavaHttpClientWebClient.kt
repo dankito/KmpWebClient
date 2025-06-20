@@ -145,16 +145,27 @@ open class JavaHttpClientWebClient(
 
     protected open fun <T : Any> mapResponse(method: String, parameters: RequestParameters<T>, response: HttpResponse<String>,
                                              requestTime: Instant): WebClientResult<T> {
+        val url = response.uri().toString()
         val status = response.statusCode()
-        val responseDetails = ResponseDetails(status, "", requestTime, Instant.now(), response.version().toString(),
+        val reasonPhrase = "" // TODO
+        val responseDetails = ResponseDetails(status, reasonPhrase, requestTime, Instant.now(), response.version().toString(),
             response.headers().map(), emptyList(), // TODO: map cookies
             response.headers().firstValue("Content-Type").orElse(null), response.headers().firstValue("Content-Length").orElse(null)?.toLongOrNull() // TODO: extract Charset from Content-Type
         )
-        val responseBody = decodeResponseBody(parameters, response)
 
-        // TODO: catch and map errors
+        return if (status in 200..299) {
+            val responseBody = decodeResponseBody(parameters, response)
 
-        return WebClientResult(response.uri().toString(), status < 300, responseDetails, body = responseBody)
+            // TODO: catch and map errors
+
+            WebClientResult(url, true, responseDetails, body = responseBody)
+        } else {
+            val responseBody = response.body()
+            val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
+
+            WebClientResult(url, false, responseDetails, errorType, WebClientException("The HTTP response indicated an error: " +
+                    "$status $reasonPhrase", null, responseDetails, responseBody))
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
