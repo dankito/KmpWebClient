@@ -1,6 +1,7 @@
 package net.dankito.web.client
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.InternalSerializationApi
@@ -29,6 +30,10 @@ open class JavaHttpClientWebClient(
 
         config.connectTimeoutMillis?.let {
             connectTimeout(Duration.ofMillis(it))
+        }
+
+        config.dispatcher?.let { dispatcher ->
+            executor(dispatcher.asExecutor())
         }
     }.build()
 
