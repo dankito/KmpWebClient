@@ -13,6 +13,7 @@ import net.dankito.datetime.Instant
 import net.dankito.web.client.auth.BasicAuthAuthentication
 import java.io.ByteArrayOutputStream
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -43,10 +44,6 @@ open class JavaHttpClientWebClient(
     protected val requestBuilder = HttpRequest
         .newBuilder()
         .apply {
-            config.baseUrl?.let { baseUrl ->
-                uri(URI(baseUrl))
-            }
-
             config.defaultUserAgent?.let { header("User-Agent", it) }
 
             header("Content-Type", config.defaultContentType)
@@ -107,7 +104,7 @@ open class JavaHttpClientWebClient(
     }
 
     protected open fun <T : Any> configureRequest(method: String, parameters: RequestParameters<T>): HttpRequest = requestBuilder.copy().apply {
-        uri(URI(parameters.url)) // TODO: append baseUrl and queryParameters if set
+        uri(URI(buildUrl(config.baseUrl, parameters)))
 
         parameters.requestTimeoutMillis?.let { timeout(Duration.ofMillis(it)) }
 
@@ -115,6 +112,26 @@ open class JavaHttpClientWebClient(
 
         method(method, getRequestBody(parameters))
     }.build()
+
+    protected open fun <T : Any> buildUrl(baseUrl: String?, parameters: RequestParameters<T>): String {
+        val relOrAbsUrl = parameters.url
+
+        val withoutQueryParameters = if (baseUrl != null && relOrAbsUrl.startsWith("http://", true) == false && relOrAbsUrl.startsWith("https://", true) == false) {
+            // URI(baseUrl).resolve(url) is too stupid to add '/' if necessary or merge two '/', so do it manually
+            "${baseUrl.removeSuffix("/")}/${relOrAbsUrl.removePrefix("/")}"
+        } else {
+            relOrAbsUrl
+        }
+
+        return if (parameters.queryParameters.isEmpty()) {
+            withoutQueryParameters
+        } else {
+            val query = parameters.queryParameters.entries.joinToString("&", "?") { (name, value) ->
+                "${URLEncoder.encode(name, Charsets.UTF_8)}=${URLEncoder.encode(value.toString(), Charsets.UTF_8)}"
+            }
+            withoutQueryParameters + query
+        }
+    }
 
     protected open fun <T : Any> setHeaders(requestBuilder: HttpRequest.Builder, parameters: RequestParameters<T>) {
         val headers = mutableMapOf<String, String>()
