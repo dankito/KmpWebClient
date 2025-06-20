@@ -15,7 +15,7 @@ open class WebClientException(
 
 
     override fun toString(): String {
-        return "$httpStatusCode $message. isClientError = $isClientError, isServerError = $isServerError"
+        return "$httpStatusCode: $message. isClientError = $isClientError, isServerError = $isServerError"
     }
 
 }
