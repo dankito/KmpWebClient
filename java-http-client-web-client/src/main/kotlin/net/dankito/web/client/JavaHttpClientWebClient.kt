@@ -106,17 +106,15 @@ open class JavaHttpClientWebClient(
         }
     }
 
-    protected open fun <T : Any> configureRequest(method: String, parameters: RequestParameters<T>): HttpRequest {
-        val builder = requestBuilder.copy()
+    protected open fun <T : Any> configureRequest(method: String, parameters: RequestParameters<T>): HttpRequest = requestBuilder.copy().apply {
+        uri(URI(parameters.url)) // TODO: append baseUrl and queryParameters if set
 
-        builder.uri(URI(parameters.url)) // TODO: append baseUrl and queryParameters if set
+        parameters.requestTimeoutMillis?.let { timeout(Duration.ofMillis(it)) }
 
-        parameters.requestTimeoutMillis?.let { builder.timeout(Duration.ofMillis(it)) }
+        setHeaders(this, parameters)
 
-        setHeaders(builder, parameters)
-
-        return builder.method(method, getRequestBody(parameters)).build()
-    }
+        method(method, getRequestBody(parameters))
+    }.build()
 
     protected open fun <T : Any> setHeaders(requestBuilder: HttpRequest.Builder, parameters: RequestParameters<T>) {
         val headers = mutableMapOf<String, String>()
