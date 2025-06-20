@@ -213,7 +213,7 @@ open class KtorWebClient(
             try {
                 WebClientResult(url, true, responseDetails, body = decodeResponse(parameters, response))
             } catch (e: Throwable) {
-                log.error(e) { "Error while mapping response of: ${method.value} ${response.request.url}, ${response.headers.toMap()}" }
+                log.error(e) { "Error while mapping response of: ${method.value} $url, ${response.headers.toMap()}" }
                 WebClientResult(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails))
             }
         } else {
