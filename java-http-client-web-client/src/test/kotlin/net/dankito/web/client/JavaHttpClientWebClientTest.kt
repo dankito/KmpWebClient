@@ -14,7 +14,11 @@ class JavaHttpClientWebClientTest {
     }
 
 
-    private val underTest = JavaHttpClientWebClient(ClientConfig(ignoreCertificateErrors = true))
+    private val underTest = object : JavaHttpClientWebClient(ClientConfig(ignoreCertificateErrors = true)) {
+        public override fun <T : Any> buildUrl(baseUrl: String?, parameters: RequestParameters<T>): String {
+            return super.buildUrl(baseUrl, parameters)
+        }
+    }
 
 
     @Test
@@ -89,6 +93,44 @@ class JavaHttpClientWebClientTest {
         val response = underTest.delete(RequestParameters(Url, String::class))
 
         assertSuccessGetOrDeleteResponse(response)
+    }
+
+
+    @Test
+    fun buildUrl_baseUrlNull() {
+        val url = "https://codinux.net"
+
+        val result = underTest.buildUrl(null, RequestParameters(url))
+
+        assertThat(result).isEqualTo(url)
+    }
+
+    @Test
+    fun buildUrl_baseUrlSet_AbsoluteUrl() {
+        val url = "https://codinux.net"
+
+        val result = underTest.buildUrl("https://dankito.net", RequestParameters(url))
+
+        assertThat(result).isEqualTo(url)
+    }
+
+    @Test
+    fun buildUrl_baseUrl_RelativeUrl() {
+        val baseUrl = "https://codinux.net"
+        val url = "downloads.html"
+
+        val result = underTest.buildUrl(baseUrl, RequestParameters(url))
+
+        assertThat(result).isEqualTo(baseUrl + "/" + url)
+    }
+
+    @Test
+    fun buildUrl_queryParameters() {
+        val url = "https://codinux.net"
+
+        val result = underTest.buildUrl(null, RequestParameters(url, queryParameters = mapOf("q" to "Liebe", "format" to "cuddle")))
+
+        assertThat(result).isEqualTo(url + "?q=Liebe&format=cuddle")
     }
 
 
