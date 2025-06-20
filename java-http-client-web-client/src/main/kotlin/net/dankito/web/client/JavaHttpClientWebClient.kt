@@ -84,7 +84,7 @@ open class JavaHttpClientWebClient(
     override suspend fun <T : Any> custom(httpMethod: String, parameters: RequestParameters<T>): WebClientResult<T> = makeRequest(httpMethod, parameters)
 
 
-    protected open suspend fun <T : Any> makeRequest(method: String, parameters: RequestParameters<T>): WebClientResult<T> = withContext(Dispatchers.IO) {
+    protected open suspend fun <T : Any> makeRequest(method: String, parameters: RequestParameters<T>): WebClientResult<T> = withContext(config.dispatcher ?: Dispatchers.IO) {
         try {
             val request = configureRequest(method, parameters)
 
