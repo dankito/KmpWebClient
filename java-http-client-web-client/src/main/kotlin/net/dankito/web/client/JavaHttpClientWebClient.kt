@@ -88,15 +88,22 @@ open class JavaHttpClientWebClient(
 
 
     protected open suspend fun <T : Any> makeRequest(method: String, parameters: RequestParameters<T>): WebClientResult<T> = withContext(Dispatchers.IO) {
-        val request = configureRequest(method, parameters)
+        try {
+            val request = configureRequest(method, parameters)
 
-        val requestTime = Instant.now()
+            val requestTime = Instant.now()
 
-//        val bodyHandler = JavaHttpResponseBodyHandler()
-        val bodyHandler = HttpResponse.BodyHandlers.ofString()
-        val response = client.sendAsync(request, bodyHandler).await()
+//            val bodyHandler = JavaHttpResponseBodyHandler()
+            val bodyHandler = HttpResponse.BodyHandlers.ofString()
+            val response = client.sendAsync(request, bodyHandler).await()
 
-        mapResponse(method, parameters, response, requestTime)
+            mapResponse(method, parameters, response, requestTime)
+        } catch (e: Throwable) {
+            log.error(e) { "Error during request to $method ${parameters.url}" }
+            val (url, errorType) = null to null // TODO: implement getErrorTypeAndRequestedUrl(e) like in KtorWebClient
+            // be aware this might not be the absolute url but only the relative url the user has passed to WebClient
+            WebClientResult(url ?: parameters.url, false, null, errorType, WebClientException(e.message, e))
+        }
     }
 
     protected open fun <T : Any> configureRequest(method: String, parameters: RequestParameters<T>): HttpRequest {
