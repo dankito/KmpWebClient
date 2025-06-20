@@ -54,8 +54,13 @@ open class WebClientResult<T>(
     override fun toString(): String {
         return if (successful) {
             "Successful: $statusCode $body"
-        } else {
-            "Error: $statusCode $error"
+        } else if (error != null) {
+            "Error: $error" // WebClientException already prints the HTTP status code
+        } else if (responseDetails != null) {
+            "Error $errorType $statusCode ${responseDetails?.reasonPhrase}: $body"
+        }
+        else {
+            "Error $errorType: $body"
         }
     }
 
