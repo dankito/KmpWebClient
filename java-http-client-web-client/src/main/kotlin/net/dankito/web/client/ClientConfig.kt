@@ -1,5 +1,6 @@
 package net.dankito.web.client
 
+import kotlinx.coroutines.CoroutineDispatcher
 import net.dankito.web.client.auth.Authentication
 
 open class ClientConfig(
@@ -13,6 +14,8 @@ open class ClientConfig(
     open val defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
     open val defaultContentType: String = ContentTypes.JSON,
     open val defaultAccept: String = ContentTypes.JSON,
+
+    open val dispatcher: CoroutineDispatcher? = null,
 
     open val enableBodyCompression: Boolean = false,
 
