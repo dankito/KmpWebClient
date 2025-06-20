@@ -88,15 +88,7 @@ open class JavaHttpClientWebClient(
 
 
     protected open suspend fun <T : Any> makeRequest(method: String, parameters: RequestParameters<T>): WebClientResult<T> = withContext(Dispatchers.IO) {
-        val builder = requestBuilder.copy()
-
-        builder.uri(URI(parameters.url)) // TODO: append baseUrl and queryParameters if set
-
-        parameters.requestTimeoutMillis?.let { builder.timeout(Duration.ofMillis(it)) }
-
-        setHeaders(builder, parameters)
-
-        val request = builder.method(method, getRequestBody(parameters)).build()
+        val request = configureRequest(method, parameters)
 
         val requestTime = Instant.now()
 
@@ -105,6 +97,18 @@ open class JavaHttpClientWebClient(
         val response = client.sendAsync(request, bodyHandler).await()
 
         mapResponse(method, parameters, response, requestTime)
+    }
+
+    protected open fun <T : Any> configureRequest(method: String, parameters: RequestParameters<T>): HttpRequest {
+        val builder = requestBuilder.copy()
+
+        builder.uri(URI(parameters.url)) // TODO: append baseUrl and queryParameters if set
+
+        parameters.requestTimeoutMillis?.let { builder.timeout(Duration.ofMillis(it)) }
+
+        setHeaders(builder, parameters)
+
+        return builder.method(method, getRequestBody(parameters)).build()
     }
 
     protected open fun <T : Any> setHeaders(requestBuilder: HttpRequest.Builder, parameters: RequestParameters<T>) {
