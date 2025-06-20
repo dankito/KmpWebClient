@@ -8,6 +8,7 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import net.codinux.log.logger
 import net.dankito.datetime.Instant
 import net.dankito.web.client.auth.BasicAuthAuthentication
 import java.io.ByteArrayOutputStream
@@ -22,6 +23,8 @@ import java.util.zip.GZIPOutputStream
 open class JavaHttpClientWebClient(
     protected val config: ClientConfig = ClientConfig(),
 ) : WebClient {
+
+    protected val log by logger()
 
     protected val client = HttpClient.newBuilder().apply {
         if (config.ignoreCertificateErrors) {
@@ -154,11 +157,14 @@ open class JavaHttpClientWebClient(
         )
 
         return if (status in 200..299) {
-            val responseBody = decodeResponseBody(parameters, response)
+            try {
+                val responseBody = decodeResponseBody(parameters, response)
 
-            // TODO: catch and map errors
-
-            WebClientResult(url, true, responseDetails, body = responseBody)
+                WebClientResult(url, true, responseDetails, body = responseBody)
+            } catch (e: Throwable) {
+                log.error(e) { "Error while mapping response of: $method $url, ${responseDetails.headersFirstValue}" }
+                WebClientResult(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails))
+            }
         } else {
             val responseBody = response.body()
             val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError

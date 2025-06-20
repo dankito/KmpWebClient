@@ -10,6 +10,7 @@ kotlin {
 
 val coroutinesVersion: String by project
 val kotlinxSerializationVersion: String by project
+val klfVersion: String by project
 
 val assertKVersion: String by project
 
@@ -18,6 +19,8 @@ dependencies {
     
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
+
+    implementation("net.codinux.log:klf:$klfVersion")
 
 
     testImplementation(kotlin("test"))
