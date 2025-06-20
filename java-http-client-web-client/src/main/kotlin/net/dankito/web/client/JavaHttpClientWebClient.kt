@@ -23,12 +23,12 @@ open class JavaHttpClientWebClient(
 ) : WebClient {
 
     protected val client = HttpClient.newBuilder().apply {
+        if (config.ignoreCertificateErrors) {
+            sslContext(SslSettings.trustAllCertificatesSslContext)
+        }
+
         config.connectTimeoutMillis?.let {
             connectTimeout(Duration.ofMillis(it))
-
-            if (config.ignoreCertificateErrors) {
-                sslContext(SslSettings.trustAllCertificatesSslContext)
-            }
         }
     }.build()
 
