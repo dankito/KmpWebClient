@@ -158,14 +158,14 @@ open class JavaHttpClientWebClient(
     protected open fun <T : Any> mapResponse(method: String, parameters: RequestParameters<T>, response: HttpResponse<String>,
                                              requestTime: Instant): WebClientResult<T> {
         val url = response.uri().toString()
-        val status = response.statusCode()
-        val reasonPhrase = "" // TODO
-        val responseDetails = ResponseDetails(status, reasonPhrase, requestTime, Instant.now(), response.version().toString(),
+        val statusCode = response.statusCode()
+        val reasonPhrase = HttpStatus.getReasonPhrase(statusCode) ?: ""
+        val responseDetails = ResponseDetails(statusCode, reasonPhrase, requestTime, Instant.now(), response.version().toString(),
             response.headers().map(), emptyList(), // TODO: map cookies
             response.headers().firstValue("Content-Type").orElse(null), response.headers().firstValue("Content-Length").orElse(null)?.toLongOrNull() // TODO: extract Charset from Content-Type
         )
 
-        return if (status in 200..299) {
+        return if (statusCode in 200..299) {
             try {
                 val responseBody = decodeResponseBody(parameters, response)
 
@@ -179,7 +179,7 @@ open class JavaHttpClientWebClient(
             val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
 
             WebClientResult(url, false, responseDetails, errorType, WebClientException("The HTTP response indicated an error: " +
-                    "$status $reasonPhrase", null, responseDetails, responseBody))
+                    "$statusCode $reasonPhrase", null, responseDetails, responseBody))
         }
     }
 
