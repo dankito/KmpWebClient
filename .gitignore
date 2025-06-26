@@ -5,6 +5,7 @@
 **/out
 
 .gradle
+.kotlin
 
 /local.properties
 
