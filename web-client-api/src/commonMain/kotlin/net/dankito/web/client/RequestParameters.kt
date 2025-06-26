@@ -26,9 +26,9 @@ open class RequestParameters<T : Any>(
     companion object {
         const val DefaultContentType = ContentTypes.JSON
 
-        const val DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+        const val DefaultUserAgent = UserAgent.Chrome_Windows_138
 
-        const val DefaultMobileUserAgent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36"
+        const val DefaultMobileUserAgent = UserAgent.Android
     }
 
 }
