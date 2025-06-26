@@ -178,7 +178,7 @@ open class KtorWebClient(
             this.method = method
 
             url {
-                val url = parameters.url
+                val url = parameters.url.replace(" ", "%20") // is not a real encoding, but at least encodes white spaces
                 if (url.startsWith("http", true)) { // absolute url
                     takeFrom(url)
                 } else { // relative url

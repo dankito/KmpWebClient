@@ -129,6 +129,29 @@ class KtorWebClientTest {
     }
 
 
+    @Test
+    fun encodesWhitespacesInPath() = runTest {
+        val url = Url + "/Favicon 144px.jpg"
+
+        val response = underTest.head(url)
+
+        println("Response: $response")
+
+        assertThat(response::successful).isTrue()
+        assertThat(response::requestedUrl).isEqualTo(url.replace(" ", "%20"))
+    }
+
+    @Test
+    fun doesNotEncodeLegalValidCharacters() = runTest {
+        val url = Url + "/faviconV2?client=chrome&nfrp=2&check_seen=true&min_size=16&size=32&max_size=64&fallback_opts=TYPE,SIZE,URL&url=https://heise.de"
+
+        val response = underTest.head(url)
+
+        assertThat(response::successful).isTrue()
+        assertThat(response::requestedUrl).isEqualTo(url)
+    }
+
+
     private fun assertNoContentResponse(response: WebClientResult<Unit>) {
         assertThat(response::successful).isTrue()
         assertThat(response::statusCode).isEqualTo(204)
