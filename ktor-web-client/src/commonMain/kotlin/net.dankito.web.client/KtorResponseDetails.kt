@@ -32,6 +32,10 @@ open class KtorResponseDetails(
     override val charset: String? by lazy { response.charset()?.name }
 
 
+    open suspend fun responseBodyAsText(fallbackCharset: Charset = Charsets.UTF_8): String =
+        response.bodyAsText(fallbackCharset)
+
+
     protected open fun mapCookie(cookie: io.ktor.http.Cookie) = Cookie(
         cookie.name,
         cookie.value,
