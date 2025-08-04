@@ -162,6 +162,10 @@ open class KtorWebClient(
         return try {
             val httpResponse = client.request {
                 configureRequest(this, method, parameters)
+
+                if (config.logOutgoingRequests) {
+                    log.info { "Sending request to ${method.value} ${this.url} ..." }
+                }
             }
 
             mapHttResponse(method, parameters, httpResponse)
@@ -220,21 +224,30 @@ open class KtorWebClient(
     protected open suspend fun <T : Any> mapHttResponse(method: HttpMethod, parameters: RequestParameters<T>, response: HttpResponse): WebClientResult<T> {
         val url = getUrl(response)
 
-        val responseDetails = KtorResponseDetails(response)
+        val details = KtorResponseDetails(response)
 
         return if (response.status.isSuccess()) {
             try {
-                WebClientResult(url, true, responseDetails, body = decodeResponse(parameters, response))
+                if (config.logSuccessfulResponses) {
+                    log.info { "Successful response retrieved from ${method.value} $url: ${details.statusCode} ${details.reasonPhrase}" }
+                }
+
+                WebClientResult(url, true, details, body = decodeResponse(parameters, response))
             } catch (e: Throwable) {
                 log.error(e) { "Error while mapping response of: ${method.value} $url, ${response.headers.toMap()}" }
-                WebClientResult(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails))
+                WebClientResult(url, false, details, ClientErrorType.DeserializationError, WebClientException(e.message, e, details))
             }
         } else {
             val responseBody = response.bodyAsText()
-            val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
+            val errorType = if (details.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
 
-            WebClientResult(url, false, responseDetails, errorType, WebClientException("The HTTP response indicated an error: " +
-                    "${response.status.value} ${response.status.description}", null, responseDetails, responseBody))
+            if (config.logErroneousResponses) {
+                log.info { "Erroneous response retrieved from ${method.value} $url: ${details.statusCode} ${details.reasonPhrase}. Body:\n${responseBody.take(250)}" +
+                        if (responseBody.length > 250) "..." else "" }
+            }
+
+            WebClientResult(url, false, details, errorType, WebClientException("The HTTP response indicated an error: " +
+                    "${response.status.value} ${response.status.description}", null, details, responseBody))
         }
     }
 

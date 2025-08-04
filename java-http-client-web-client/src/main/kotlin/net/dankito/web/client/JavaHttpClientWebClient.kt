@@ -90,6 +90,10 @@ open class JavaHttpClientWebClient(
 
             val requestTime = Instant.now()
 
+            if (config.logOutgoingRequests) {
+                log.info { "Sending request to $method ${request.uri()} ..." }
+            }
+
 //            val bodyHandler = JavaHttpResponseBodyHandler()
             val bodyHandler = HttpResponse.BodyHandlers.ofString()
             val response = client.sendAsync(request, bodyHandler).await()
@@ -184,6 +188,10 @@ open class JavaHttpClientWebClient(
 
         return if (statusCode in 200..299) {
             try {
+                if (config.logSuccessfulResponses) {
+                    log.info { "Successful response retrieved from $method $url: $statusCode $reasonPhrase" }
+                }
+
                 val responseBody = decodeResponseBody(parameters, response)
 
                 WebClientResult(url, true, responseDetails, body = responseBody)
@@ -194,6 +202,11 @@ open class JavaHttpClientWebClient(
         } else {
             val responseBody = response.body()
             val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
+
+            if (config.logErroneousResponses) {
+                log.info { "Erroneous response retrieved from $method $url: $statusCode $reasonPhrase. Body:\n${responseBody?.take(250)}" +
+                            if (responseBody != null && responseBody.length > 250) "..." else "" }
+            }
 
             WebClientResult(url, false, responseDetails, errorType, WebClientException("The HTTP response indicated an error: " +
                     "$statusCode $reasonPhrase", null, responseDetails, responseBody))
