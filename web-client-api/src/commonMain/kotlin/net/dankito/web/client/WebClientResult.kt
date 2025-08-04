@@ -44,9 +44,9 @@ open class WebClientResult<T>(
      *
      * Set to `-1` in case no response has been retrieved.
      */
-    val statusCode = responseDetails?.statusCode ?: -1
+    open val statusCode = responseDetails?.statusCode ?: -1
 
-    val successfulAndBodySet: Boolean = successful && body != null
+    open val successfulAndBodySet: Boolean = successful && body != null
 
     open fun <R> mapResponseBodyIfSuccessful(mapper: (T) -> R): WebClientResult<R> =
         if (successful && body != null) {
