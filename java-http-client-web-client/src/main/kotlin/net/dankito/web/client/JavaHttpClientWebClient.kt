@@ -20,6 +20,7 @@ import java.net.http.HttpResponse
 import java.time.Duration
 import java.util.*
 import java.util.zip.GZIPOutputStream
+import kotlin.text.replace
 
 open class JavaHttpClientWebClient(
     protected val config: ClientConfig = ClientConfig(),
@@ -135,6 +136,7 @@ open class JavaHttpClientWebClient(
             }
             withoutQueryParameters + query
         }
+            .replace(" ", "%20") // is not a real encoding, but at least encodes white spaces
     }
 
     protected open fun <T : Any> setHeaders(requestBuilder: HttpRequest.Builder, parameters: RequestParameters<T>) {
