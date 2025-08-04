@@ -46,6 +46,8 @@ open class WebClientResult<T>(
      */
     val statusCode = responseDetails?.statusCode ?: -1
 
+    val successfulAndBodySet: Boolean = successful && body != null
+
 
     open fun <K> copyWithBody(body: K) =
         WebClientResult(this.requestedUrl, this.successful, this.responseDetails, this.errorType, this.error, body)
