@@ -48,6 +48,16 @@ open class WebClientResult<T>(
 
     val successfulAndBodySet: Boolean = successful && body != null
 
+    open fun <R> mapResponseBodyIfSuccessful(mapper: (T) -> R): WebClientResult<R> =
+        if (successful && body != null) {
+            copyWithBody(mapper(body!!))
+        } else {
+            @Suppress("UNCHECKED_CAST")
+            this as WebClientResult<R>
+        }
+
+    // TODO: add method for error case
+
 
     open fun <K> copyWithBody(body: K) =
         WebClientResult(this.requestedUrl, this.successful, this.responseDetails, this.errorType, this.error, body)
