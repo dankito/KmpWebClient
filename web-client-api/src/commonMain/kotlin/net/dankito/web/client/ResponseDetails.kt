@@ -3,6 +3,9 @@ package net.dankito.web.client
 import net.dankito.datetime.Instant
 
 open class ResponseDetails(
+    val method: String,
+    val parameters: RequestParameters<*>,
+
     val statusCode: Int,
     val reasonPhrase: String,
 

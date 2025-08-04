@@ -224,7 +224,7 @@ open class KtorWebClient(
     protected open suspend fun <T : Any> mapHttResponse(method: HttpMethod, parameters: RequestParameters<T>, response: HttpResponse): WebClientResult<T> {
         val url = getUrl(response)
 
-        val details = KtorResponseDetails(response)
+        val details = KtorResponseDetails(method.value, parameters, response)
 
         return if (response.status.isSuccess()) {
             try {

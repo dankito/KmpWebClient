@@ -8,8 +8,10 @@ import net.dankito.datetime.Instant
 import net.dankito.web.client.util.WebDateTimeUtil
 
 open class KtorResponseDetails(
+    method: String,
+    parameters: RequestParameters<*>,
     open val response: HttpResponse,
-) : ResponseDetails(response.status.value, response.status.description) {
+) : ResponseDetails(method, parameters, response.status.value, response.status.description) {
 
     override val requestTime: Instant? by lazy { WebDateTimeUtil.gmtDateToInstant(response.requestTime) }
 
