@@ -48,7 +48,8 @@ open class WebClientResult<T>(
 
     open val successfulAndBodySet: Boolean = successful && body != null
 
-    open fun <R> mapResponseBodyIfSuccessful(mapper: (T) -> R): WebClientResult<R> =
+    // made function inline so that also suspendable function can be called in mapper lambda
+    inline fun <R> mapResponseBodyIfSuccessful(mapper: (T) -> R): WebClientResult<R> =
         if (successful && body != null) {
             copyWithBody(mapper(body!!))
         } else {
