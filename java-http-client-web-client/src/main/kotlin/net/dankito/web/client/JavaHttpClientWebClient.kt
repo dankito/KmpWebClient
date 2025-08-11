@@ -12,6 +12,7 @@ import net.codinux.log.logger
 import net.dankito.datetime.Instant
 import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.auth.BasicAuthAuthentication
+import net.dankito.web.client.auth.BearerAuthentication
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.URLEncoder
@@ -160,6 +161,10 @@ open class JavaHttpClientWebClient(
             val authHeader = "Basic " + Base64.getEncoder()
                 .encodeToString("${basicAuth.username}:${basicAuth.password}".toByteArray())
             request.header("Authorization", authHeader)
+        }
+
+        (authentication as? BearerAuthentication)?.let { bearerAuth ->
+            request.header("Authorization", "Bearer ${bearerAuth.bearerToken}")
         }
     }
 

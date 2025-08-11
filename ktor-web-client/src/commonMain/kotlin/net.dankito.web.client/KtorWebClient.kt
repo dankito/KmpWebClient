@@ -95,7 +95,7 @@ open class KtorWebClient(
                 config.requestTimeoutMillis?.let { requestTimeoutMillis = it }
             }
 
-            if (config.authentication != null) {
+            config.authentication?.let { authentication ->
                 install(Auth) {
                     (config.authentication as? BasicAuthAuthentication)?.let { basicAuth ->
                         basic {
@@ -103,6 +103,14 @@ open class KtorWebClient(
                             credentials {
                                 BasicAuthCredentials(basicAuth.username, basicAuth.password)
                             }
+                        }
+                    }
+
+
+                    (authentication as? BearerAuthentication)?.let { bearerAuth ->
+                        bearer {
+                            sendWithoutRequest { true }
+                            loadTokens { BearerTokens(bearerAuth.bearerToken, null) }
                         }
                     }
                 }
@@ -222,6 +230,10 @@ open class KtorWebClient(
             parameters.authentication?.let { authentication ->
                 (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
                     this.basicAuth(basicAuth.username, basicAuth.password)
+                }
+
+                (authentication as? BearerAuthentication)?.let { bearerAuth ->
+                    this.bearerAuth(bearerAuth.bearerToken)
                 }
             }
         }
