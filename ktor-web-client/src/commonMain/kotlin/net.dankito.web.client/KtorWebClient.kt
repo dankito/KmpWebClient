@@ -281,7 +281,8 @@ open class KtorWebClient(
         } else {
             // TODO: add cache for Serializers
             // TODO: stream response (at least on JVM)
-            (parameters.serializer ?: config.serializer).deserialize(clientResponse.body(), responseClass)
+            (parameters.serializer ?: config.serializer).deserialize(clientResponse.bodyAsText(),
+                responseClass, parameters.responseGenericType1, parameters.responseGenericType2)
         }
     }
 

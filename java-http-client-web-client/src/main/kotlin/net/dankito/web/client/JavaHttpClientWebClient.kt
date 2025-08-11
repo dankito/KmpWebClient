@@ -233,7 +233,8 @@ open class JavaHttpClientWebClient(
             val bytes: ByteArray = bodyString.encodeToByteArray()
             bytes as T
         } else {
-            (parameters.serializer ?: config.serializer).deserialize(bodyString, responseClass)
+            (parameters.serializer ?: config.serializer).deserialize(bodyString, responseClass,
+                parameters.responseGenericType1, parameters.responseGenericType2)
         }
     }
 

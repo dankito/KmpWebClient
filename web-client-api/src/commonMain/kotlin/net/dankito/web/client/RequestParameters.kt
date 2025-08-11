@@ -14,6 +14,8 @@ open class RequestParameters<T : Any>(
     open val queryParameters: Map<String, Any> = mapOf(),
     open val authentication: Authentication? = null,
     open val serializer: Serializer? = null,
+    open val responseGenericType1: KClass<*>? = null,
+    open val responseGenericType2: KClass<*>? = null,
     /**
      * If set to `true` or [ClientConfig.enableBodyCompression] is set to `true` compresses request body if supported.
      *
