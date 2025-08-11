@@ -29,6 +29,8 @@ open class JavaHttpClientWebClient(
     protected val log by logger()
 
     protected val client = HttpClient.newBuilder().apply {
+        followRedirects(HttpClient.Redirect.NORMAL)
+
         if (config.ignoreCertificateErrors) {
             sslContext(SslSettings.trustAllCertificatesSslContext)
         }
