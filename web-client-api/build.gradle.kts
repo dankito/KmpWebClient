@@ -44,6 +44,7 @@ kotlin {
 
     val kotlinxSerializationVersion: String by project
     val kmpDateTimeVersion: String by project
+    val klfVersion: String by project
 
     val jacksonVersion: String by project
 
@@ -52,6 +53,8 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
 
             api("net.dankito.datetime:kmp-datetime:$kmpDateTimeVersion")
+
+            implementation("net.codinux.log:klf:$klfVersion")
         }
 
         jvmMain.dependencies {
