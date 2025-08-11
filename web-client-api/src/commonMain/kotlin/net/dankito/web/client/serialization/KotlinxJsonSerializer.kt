@@ -7,6 +7,7 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.serializer
 import net.codinux.log.logger
 import kotlin.reflect.KClass
@@ -20,6 +21,10 @@ open class KotlinxJsonSerializer : Serializer {
 
     protected open val json = Json {
         ignoreUnknownKeys = true
+    }
+
+    protected open val prettyPrintJson = Json {
+        prettyPrint = true
     }
 
     protected val log by logger()
@@ -44,8 +49,15 @@ open class KotlinxJsonSerializer : Serializer {
 
             this.json.decodeFromString(serializer, serializedObject)
         } catch (e: Throwable) {
-            log.error(e) { "Could not map JSON to $typeClass:\n$serializedObject" }
+            log.error(e) { "Could not map JSON to $typeClass:\n${prettyPrint(serializedObject)}" }
             throw e
         }
+
+
+    protected open fun prettyPrint(json: String): String {
+        val jsonElement: JsonElement = this.json.parseToJsonElement(json)
+
+        return prettyPrintJson.encodeToString(JsonElement.serializer(), jsonElement)
+    }
 
 }
