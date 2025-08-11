@@ -16,10 +16,10 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.*
 import io.ktor.util.date.*
 import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 import net.codinux.log.logger
 import net.dankito.web.client.auth.*
+import net.dankito.web.client.serialization.KotlinxJsonSerializer
+import net.dankito.web.client.serialization.Serializer
 import net.dankito.web.client.sse.KtorSseClient
 import net.dankito.web.client.sse.SseClient
 
@@ -46,9 +46,10 @@ open class KtorWebClient(
         defaultUserAgent: String? = RequestParameters.DefaultMobileUserAgent,
         defaultContentType: String = ContentTypes.JSON,
         defaultAccept: String = ContentTypes.JSON,
+        serializer: Serializer = KotlinxJsonSerializer.Instance,
         enableBodyCompression: Boolean = false,
         customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
-    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType, defaultAccept, enableBodyCompression), customClientCreator)
+    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType, defaultAccept, serializer, enableBodyCompression), customClientCreator)
 
 
     companion object {
@@ -63,10 +64,6 @@ open class KtorWebClient(
 
     open val sse: SseClient by lazy { KtorSseClient(client) }
 
-
-    protected open val json = Json {
-        ignoreUnknownKeys = true
-    }
 
     protected val log by logger()
 
@@ -97,7 +94,7 @@ open class KtorWebClient(
 
             config.authentication?.let { authentication ->
                 install(Auth) {
-                    (config.authentication as? BasicAuthAuthentication)?.let { basicAuth ->
+                    (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
                         basic {
                             sendWithoutRequest { true }
                             credentials {
@@ -284,7 +281,7 @@ open class KtorWebClient(
         } else {
             // TODO: add cache for Serializers
             // TODO: stream response (at least on JVM)
-            json.decodeFromString(responseClass.serializer(), clientResponse.body())
+            (parameters.serializer ?: config.serializer).deserialize(clientResponse.body(), responseClass)
         }
     }
 

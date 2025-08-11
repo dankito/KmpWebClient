@@ -4,10 +4,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 import net.codinux.log.logger
 import net.dankito.datetime.Instant
 import net.dankito.web.client.auth.Authentication
@@ -64,11 +60,6 @@ open class JavaHttpClientWebClient(
 
             applyAuthentication(this, config.authentication)
         }
-
-    // for now use kotlinx-serialization so that JavaHttpClientWebClient can be used as a plug-in replacement for KtorWebClient
-    protected open val json = Json {
-        ignoreUnknownKeys = true
-    }
 
 
     override suspend fun head(parameters: RequestParameters<Unit>): WebClientResult<Unit> = makeRequest("HEAD", parameters)
@@ -175,7 +166,7 @@ open class JavaHttpClientWebClient(
         return if (body == null) {
             HttpRequest.BodyPublishers.noBody()
         } else {
-            val bodyAsString = if (body is String) body else json.encodeToString(body)
+            val bodyAsString = if (body is String) body else (parameters.serializer ?: config.serializer).serialize(body)
 
             if (parameters.compressBodyIfSupported) {
                 // TODO
@@ -230,7 +221,6 @@ open class JavaHttpClientWebClient(
     }
 
     @Suppress("UNCHECKED_CAST")
-    @OptIn(InternalSerializationApi::class)
     protected open fun <T : Any> decodeResponseBody(parameters: RequestParameters<T>, response: HttpResponse<String>): T {
         val bodyString = response.body()
         val responseClass = parameters.responseClass
@@ -243,7 +233,7 @@ open class JavaHttpClientWebClient(
             val bytes: ByteArray = bodyString.encodeToByteArray()
             bytes as T
         } else {
-            json.decodeFromString(responseClass.serializer(), bodyString)
+            (parameters.serializer ?: config.serializer).deserialize(bodyString, responseClass)
         }
     }
 

@@ -1,6 +1,7 @@
 package net.dankito.web.client
 
 import net.dankito.web.client.auth.Authentication
+import net.dankito.web.client.serialization.Serializer
 import kotlin.reflect.KClass
 
 open class RequestParameters<T : Any>(
@@ -12,6 +13,7 @@ open class RequestParameters<T : Any>(
     open val headers: Map<String, String> = mutableMapOf(),
     open val queryParameters: Map<String, Any> = mapOf(),
     open val authentication: Authentication? = null,
+    open val serializer: Serializer? = null,
     /**
      * If set to `true` or [ClientConfig.enableBodyCompression] is set to `true` compresses request body if supported.
      *

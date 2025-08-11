@@ -42,11 +42,20 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
 
+    val kotlinxSerializationVersion: String by project
     val kmpDateTimeVersion: String by project
+
+    val jacksonVersion: String by project
 
     sourceSets {
         commonMain.dependencies {
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
+
             api("net.dankito.datetime:kmp-datetime:$kmpDateTimeVersion")
+        }
+
+        jvmMain.dependencies {
+            compileOnly("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         }
     }
 }

@@ -2,6 +2,8 @@ package net.dankito.web.client
 
 import kotlinx.coroutines.CoroutineDispatcher
 import net.dankito.web.client.auth.Authentication
+import net.dankito.web.client.serialization.KotlinxJsonSerializer
+import net.dankito.web.client.serialization.Serializer
 
 open class ClientConfig(
     open val baseUrl: String? = null,
@@ -16,6 +18,9 @@ open class ClientConfig(
     open val defaultAccept: String = ContentTypes.JSON,
 
     open val dispatcher: CoroutineDispatcher? = null,
+
+    // for now use kotlinx-serialization so that JavaHttpClientWebClient can be used as a plug-in replacement for KtorWebClient
+    open val serializer: Serializer = KotlinxJsonSerializer.Instance,
 
     open val enableBodyCompression: Boolean = false,
 
