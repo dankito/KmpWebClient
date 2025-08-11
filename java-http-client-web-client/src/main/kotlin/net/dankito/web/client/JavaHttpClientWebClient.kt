@@ -204,7 +204,7 @@ open class JavaHttpClientWebClient(
                 WebClientResult(url, true, responseDetails, body = responseBody)
             } catch (e: Throwable) {
                 log.error(e) { "Error while mapping response of: $method $url, ${responseDetails.headersFirstValue}" }
-                WebClientResult(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails))
+                WebClientResult(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails, response.body()))
             }
         } else {
             val responseBody = response.body()
