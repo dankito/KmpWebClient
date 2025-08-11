@@ -1,6 +1,8 @@
 package net.dankito.web.client
 
 import net.dankito.datetime.Instant
+import net.dankito.web.client.header.LinkHeader
+import net.dankito.web.client.header.LinkHeaderParser
 
 open class ResponseDetails(
     val method: String,
@@ -64,6 +66,13 @@ open class ResponseDetails(
 
         return null
     }
+
+    open val linkHeader: List<LinkHeader>? by lazy {
+        getHeaderValue("Link")?.let { LinkHeaderParser.Instance.parse(it) }
+    }
+
+    open fun getLinkHeaderNextUrl(): String? =
+        linkHeader?.firstOrNull { it.parameters["rel"] == "next" }?.url
 
 
     open val isInformationalResponse: Boolean

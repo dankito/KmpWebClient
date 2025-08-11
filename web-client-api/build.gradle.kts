@@ -48,6 +48,8 @@ kotlin {
 
     val jacksonVersion: String by project
 
+    val assertKVersion: String by project
+
     sourceSets {
         commonMain.dependencies {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
@@ -56,9 +58,17 @@ kotlin {
 
             implementation("net.codinux.log:klf:$klfVersion")
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+
+            implementation("com.willowtreeapps.assertk:assertk:$assertKVersion")
+        }
 
         jvmMain.dependencies {
             compileOnly("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+        }
+        jvmTest.dependencies {
+            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         }
     }
 }
