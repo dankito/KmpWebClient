@@ -3,6 +3,7 @@ package net.dankito.web.client.serialization
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -35,6 +36,8 @@ open class KotlinxJsonSerializer : Serializer {
                 ListSerializer(genericType1.serializer()) as KSerializer<T>
             } else if (typeClass == Set::class && genericType1 != null) {
                 SetSerializer(genericType1.serializer()) as KSerializer<T>
+            } else if (typeClass == Map::class && genericType1 != null && genericType2 != null) {
+                MapSerializer(genericType1.serializer(), genericType2.serializer()) as KSerializer<T>
             } else {
                 typeClass.serializer()
             }

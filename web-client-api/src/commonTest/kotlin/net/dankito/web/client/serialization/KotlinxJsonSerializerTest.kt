@@ -2,6 +2,7 @@ package net.dankito.web.client.serialization
 
 import assertk.assertThat
 import assertk.assertions.containsExactlyInAnyOrder
+import assertk.assertions.containsOnly
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
@@ -37,6 +38,14 @@ class KotlinxJsonSerializerTest {
 
         assertThat(result).hasSize(2)
         assertThat(result).containsExactlyInAnyOrder("one", "two")
+    }
+
+    @Test
+    fun deserializeMap() {
+        val result = underTest.deserialize("""{"one":1,"two":2}""", Map::class, String::class, Int::class)
+
+        assertThat(result).hasSize(2)
+        assertThat(result as Map<String, Int>).containsOnly("one" to 1, "two" to 2)
     }
 
 }

@@ -28,6 +28,8 @@ open class JacksonJsonSerializer : Serializer {
                 typeFactory.constructCollectionType(Set::class.java, genericType1.java)
             } else if ((typeClass.isSubclassOf(List::class) || typeClass.isSubclassOf(Collection::class)) && genericType1 != null) {
                 typeFactory.constructCollectionType(List::class.java, genericType1.java)
+            } else if (typeClass.isSubclassOf(Map::class) && genericType1 != null && genericType2 != null) {
+                typeFactory.constructMapType(Map::class.java, genericType1.java, genericType2.java)
             } else {
                 typeFactory.constructType(typeClass.java)
             }
