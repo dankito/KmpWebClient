@@ -218,6 +218,12 @@ open class KtorWebClient(
 
                 setBody(it)
             }
+
+            parameters.authentication?.let { authentication ->
+                (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
+                    this.basicAuth(basicAuth.username, basicAuth.password)
+                }
+            }
         }
     }
 

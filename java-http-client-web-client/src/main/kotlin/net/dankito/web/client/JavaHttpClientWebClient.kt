@@ -10,6 +10,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import net.codinux.log.logger
 import net.dankito.datetime.Instant
+import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.auth.BasicAuthAuthentication
 import java.io.ByteArrayOutputStream
 import java.net.URI
@@ -60,12 +61,7 @@ open class JavaHttpClientWebClient(
                 // TODO
             }
 
-            config.authentication?.let { authentication ->
-                (config.authentication as? BasicAuthAuthentication)?.let { basicAuth ->
-                    val authHeader = "Basic " + Base64.getEncoder().encodeToString("${basicAuth.username}:${basicAuth.password}".toByteArray())
-                    header("Authorization", authHeader)
-                }
-            }
+            applyAuthentication(this, config.authentication)
         }
 
     // for now use kotlinx-serialization so that JavaHttpClientWebClient can be used as a plug-in replacement for KtorWebClient
@@ -118,6 +114,8 @@ open class JavaHttpClientWebClient(
         setHeaders(this, parameters)
 
         method(method, getRequestBody(parameters))
+
+        applyAuthentication(this, parameters.authentication)
     }.build()
 
     protected open fun <T : Any> buildUrl(baseUrl: String?, parameters: RequestParameters<T>): String {
@@ -156,6 +154,15 @@ open class JavaHttpClientWebClient(
 
         headers.forEach { (name, value) -> requestBuilder.setHeader(name, value) }
     }
+
+    protected open fun applyAuthentication(request: HttpRequest.Builder, authentication: Authentication?) {
+        (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
+            val authHeader = "Basic " + Base64.getEncoder()
+                .encodeToString("${basicAuth.username}:${basicAuth.password}".toByteArray())
+            request.header("Authorization", authHeader)
+        }
+    }
+
 
     protected open fun <T : Any> getRequestBody(parameters: RequestParameters<T>): HttpRequest.BodyPublisher {
         val body = parameters.body
