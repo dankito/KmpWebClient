@@ -6,5 +6,6 @@ enum class ClientErrorType {
     ClientError,
     ServerError,
     DeserializationError,
+    MappingError,
     Unknown
 }

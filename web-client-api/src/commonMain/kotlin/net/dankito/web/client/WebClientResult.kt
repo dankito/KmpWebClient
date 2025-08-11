@@ -1,5 +1,7 @@
 package net.dankito.web.client
 
+import net.codinux.log.Log
+
 open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
     /**
      * The URL that the web client has requested which may be a combination of baseUrl set on WebClient and relative
@@ -50,17 +52,29 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
 
     // made function inline so that also suspendable function can be called in mapper lambda
     inline fun <R> mapResponseBodyIfSuccessful(mapper: (T) -> R): WebClientResult<R> =
+        @Suppress("UNCHECKED_CAST")
         if (successful && body != null) {
-            copyWithBody(mapper(body!!))
+            try {
+                copyWithBody(mapper(body!!))
+            } catch (e: Throwable) {
+                Log.error(e) { "Could not map response body: $body." }
+                WebClientResult(this.requestedUrl, false, this.responseDetails, ClientErrorType.MappingError,
+                    WebClientException("Response body '$body' could not be mapped", e, this.responseDetails))
+            }
         } else {
-            @Suppress("UNCHECKED_CAST")
             this as WebClientResult<R>
         }
 
     // made function inline so that also suspendable function can be called in mapper lambda
     inline fun <R> mapResponseBodyIfSuccessful(mapper: (WebClientResult<T>, T) -> R): WebClientResult<R> =
         if (successful && body != null) {
-            copyWithBody(mapper(this, body!!))
+            try {
+                copyWithBody(mapper(this, body!!))
+            } catch (e: Throwable) {
+                Log.error(e) { "Could not map response body: $body." }
+                WebClientResult(this.requestedUrl, false, this.responseDetails, ClientErrorType.MappingError,
+                    WebClientException("Response body '$body' could not be mapped", e, this.responseDetails))
+            }
         } else {
             @Suppress("UNCHECKED_CAST")
             this as WebClientResult<R>
@@ -80,8 +94,7 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
             "Error: $error" // WebClientException already prints the HTTP status code
         } else if (responseDetails != null) {
             "Error $errorType $statusCode ${responseDetails?.reasonPhrase}: $body"
-        }
-        else {
+        } else {
             "Error $errorType: $body"
         }
     }
