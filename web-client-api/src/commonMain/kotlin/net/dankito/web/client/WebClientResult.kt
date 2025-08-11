@@ -1,6 +1,6 @@
 package net.dankito.web.client
 
-open class WebClientResult<T>(
+open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
     /**
      * The URL that the web client has requested which may be a combination of baseUrl set on WebClient and relative
      * URL used for request.
@@ -24,7 +24,7 @@ open class WebClientResult<T>(
     /**
      * In case a response has been retrieved, details of the response like headers, cookies, ...
      */
-    open val responseDetails: ResponseDetails? = null,
+    open val responseDetails: ResponseDetails? = null, // TODO: rename to details
 
     open val errorType: ClientErrorType? = null,
 
@@ -52,6 +52,15 @@ open class WebClientResult<T>(
     inline fun <R> mapResponseBodyIfSuccessful(mapper: (T) -> R): WebClientResult<R> =
         if (successful && body != null) {
             copyWithBody(mapper(body!!))
+        } else {
+            @Suppress("UNCHECKED_CAST")
+            this as WebClientResult<R>
+        }
+
+    // made function inline so that also suspendable function can be called in mapper lambda
+    inline fun <R> mapResponseBodyIfSuccessful(mapper: (WebClientResult<T>, T) -> R): WebClientResult<R> =
+        if (successful && body != null) {
+            copyWithBody(mapper(this, body!!))
         } else {
             @Suppress("UNCHECKED_CAST")
             this as WebClientResult<R>
