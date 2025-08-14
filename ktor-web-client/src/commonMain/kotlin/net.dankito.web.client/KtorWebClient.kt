@@ -92,8 +92,8 @@ open class KtorWebClient(
                 config.requestTimeoutMillis?.let { requestTimeoutMillis = it }
             }
 
-            config.authentication?.let { authentication ->
-                install(Auth) {
+            install(Auth) { // install Auth plugin if config.authentication is set or not as authentication can also be set on a per request
+                config.authentication?.let { authentication ->
                     (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
                         basic {
                             sendWithoutRequest { true }
