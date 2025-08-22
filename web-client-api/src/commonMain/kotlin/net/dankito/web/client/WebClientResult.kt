@@ -66,7 +66,7 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
         }
 
     // made function inline so that also suspendable function can be called in mapper lambda
-    inline fun <R> mapBodyWithRequestOnSuccess(mapper: (WebClientResult<T>, T) -> R): WebClientResult<R> =
+    inline fun <R> mapBodyWithResponseOnSuccess(mapper: (WebClientResult<T>, T) -> R): WebClientResult<R> =
         if (successful && body != null) {
             try {
                 copyWithBody(mapper(this, body!!))
@@ -82,7 +82,7 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
 
     // TODO: add method for error case
 
-    @Deprecated("Replace with mapBodyIfSuccessful(). Will be removed in 2.0.0", replaceWith = ReplaceWith("mapBodyIfSuccessful(mapper)"))
+    @Deprecated("Replace with mapBodyOnSuccess(). Will be removed in 2.0.0", replaceWith = ReplaceWith("mapBodyOnSuccess(mapper)"))
     inline fun <R> mapResponseBodyIfSuccessful(mapper: (T) -> R): WebClientResult<R> =
         @Suppress("UNCHECKED_CAST")
         if (successful && body != null) {
@@ -97,7 +97,7 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
             this as WebClientResult<R>
         }
 
-    @Deprecated("Replace with mapBodyIfSuccessfulWithRequest(). Will be removed in 2.0.0", replaceWith = ReplaceWith("mapBodyIfSuccessfulWithRequest(mapper)"))
+    @Deprecated("Replace with mapBodyWithResponseOnSuccess(). Will be removed in 2.0.0", replaceWith = ReplaceWith("mapBodyWithResponseOnSuccess(mapper)"))
     inline fun <R> mapResponseBodyIfSuccessful(mapper: (WebClientResult<T>, T) -> R): WebClientResult<R> =
         if (successful && body != null) {
             try {
