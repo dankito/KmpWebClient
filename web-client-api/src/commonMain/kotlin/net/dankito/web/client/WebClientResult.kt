@@ -83,34 +83,10 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
     // TODO: add method for error case
 
     @Deprecated("Replace with mapBodyOnSuccess(). Will be removed in 2.0.0", replaceWith = ReplaceWith("mapBodyOnSuccess(mapper)"))
-    inline fun <R> mapResponseBodyIfSuccessful(mapper: (T) -> R): WebClientResult<R> =
-        @Suppress("UNCHECKED_CAST")
-        if (successful && body != null) {
-            try {
-                copyWithBody(mapper(body!!))
-            } catch (e: Throwable) {
-                Log.error(e) { "Could not map response body: $body." }
-                WebClientResult(this.requestedUrl, false, this.responseDetails, ClientErrorType.MappingError,
-                    WebClientException("Response body '$body' could not be mapped", e, this.responseDetails))
-            }
-        } else {
-            this as WebClientResult<R>
-        }
+    inline fun <R> mapResponseBodyIfSuccessful(mapper: (T) -> R) = mapBodyOnSuccess(mapper)
 
     @Deprecated("Replace with mapBodyWithResponseOnSuccess(). Will be removed in 2.0.0", replaceWith = ReplaceWith("mapBodyWithResponseOnSuccess(mapper)"))
-    inline fun <R> mapResponseBodyIfSuccessful(mapper: (WebClientResult<T>, T) -> R): WebClientResult<R> =
-        if (successful && body != null) {
-            try {
-                copyWithBody(mapper(this, body!!))
-            } catch (e: Throwable) {
-                Log.error(e) { "Could not map response body: $body." }
-                WebClientResult(this.requestedUrl, false, this.responseDetails, ClientErrorType.MappingError,
-                    WebClientException("Response body '$body' could not be mapped", e, this.responseDetails))
-            }
-        } else {
-            @Suppress("UNCHECKED_CAST")
-            this as WebClientResult<R>
-        }
+    inline fun <R> mapResponseBodyIfSuccessful(mapper: (WebClientResult<T>, T) -> R) = mapBodyWithResponseOnSuccess(mapper)
 
 
     open fun <K> copyWithBody(body: K) =
