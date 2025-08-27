@@ -2,6 +2,12 @@ package net.dankito.web.client
 
 object ContentTypes {
 
+    const val Any = "*/*"
+    /**
+     * Synonym for [Any].
+     */
+    const val Wildcard = Any
+
     const val JSON = "application/json; charset=UTF-8"
     const val XML = "application/xml; charset=UTF-8"
 
