@@ -57,9 +57,13 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
             try {
                 copyWithBody(mapper(body!!))
             } catch (e: Throwable) {
-                Log.error(e) { "Could not map response body: $body." }
+                var bodyAsString = body?.toString() ?: "null" // real long bodies crash console and Loki pusher, so give it a max length
+                if (bodyAsString.length > 750) {
+                    bodyAsString = bodyAsString.take(746) + " ..."
+                }
+                Log.error(e) { "Could not map response body: $bodyAsString." }
                 WebClientResult(this.requestedUrl, false, this.responseDetails, ClientErrorType.MappingError,
-                    WebClientException("Response body '$body' could not be mapped", e, this.responseDetails))
+                    WebClientException("Response body '$bodyAsString' could not be mapped", e, this.responseDetails))
             }
         } else {
             this as WebClientResult<R>
@@ -71,9 +75,13 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
             try {
                 copyWithBody(mapper(this, body!!))
             } catch (e: Throwable) {
-                Log.error(e) { "Could not map response body: $body." }
+                var bodyAsString = body?.toString() ?: "null" // real long bodies crash console and Loki pusher, so give it a max length
+                if (bodyAsString.length > 750) {
+                    bodyAsString = bodyAsString.take(746) + " ..."
+                }
+                Log.error(e) { "Could not map response body: $bodyAsString." }
                 WebClientResult(this.requestedUrl, false, this.responseDetails, ClientErrorType.MappingError,
-                    WebClientException("Response body '$body' could not be mapped", e, this.responseDetails))
+                    WebClientException("Response body '$bodyAsString' could not be mapped", e, this.responseDetails))
             }
         } else {
             @Suppress("UNCHECKED_CAST")
