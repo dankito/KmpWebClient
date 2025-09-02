@@ -118,7 +118,9 @@ open class KtorWebClient(
                 }
             }
 
-            install(WebSockets)
+            if (config.enableWebSocket) {
+                install(WebSockets)
+            }
 
             /**
              * SSEPlugin in Ktor (if installed but unused):
@@ -126,7 +128,9 @@ open class KtorWebClient(
              * - Doesn’t do anything unless a request matches an SSE route
              * - Minimal cost unless actively used
              */
-            install(SSE)
+            if (config.enableSSE) {
+                install(SSE)
+            }
 
             defaultRequest {
                 config.baseUrl?.let { baseUrl ->

@@ -38,6 +38,17 @@ open class ClientConfig(
     open val logOutgoingRequests: Boolean = false,
     open val logSuccessfulResponses: Boolean = false,
     open val logErroneousResponses: Boolean = false,
+
+    /**
+     * Set to `true` if you want to use websockets with [KtorWebClient.webSocket].
+     *
+     * Be aware, the `io.ktor:ktor-client-websockets` always gets added to project (there's no `compileOnly`
+     * for Kotlin Multiplatform projects).
+     * Setting `enableWebSocket` to false only disables that the `io.ktor.client.plugins.websocket.WebSockets` plugin
+     * gets applied to this KtorWebClient instance.
+     */
+    open val enableWebSocket: Boolean = false,
+    open val enableSSE: Boolean = false,
 ) {
     override fun toString() = "baseUrl = $baseUrl, authentication = $authentication, ignoreCertificateErrors = $ignoreCertificateErrors"
 }
