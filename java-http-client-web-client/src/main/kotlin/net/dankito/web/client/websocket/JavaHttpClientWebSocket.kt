@@ -3,7 +3,6 @@ package net.dankito.web.client.websocket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.codinux.log.logger
 import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.auth.BasicAuthAuthentication
 import net.dankito.web.client.auth.BearerAuthentication
@@ -11,13 +10,12 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.util.Base64
 import java.util.concurrent.CompletionStage
-import java.util.concurrent.CopyOnWriteArrayList
 
 open class JavaHttpClientWebSocket(
     url: String,
     authentication: Authentication? = null,
     httpClient: HttpClient = defaultHttpClient()
-) : WebSocket {
+) : WebSocketBase(), WebSocket {
 
     companion object {
         fun defaultHttpClient(): HttpClient = HttpClient.newBuilder()
@@ -26,15 +24,7 @@ open class JavaHttpClientWebSocket(
     }
 
 
-    protected val onTextMessageHandlers = CopyOnWriteArrayList<(String) -> Unit>()
-
-    protected val onErrorHandlers = CopyOnWriteArrayList<(Throwable?) -> Unit>()
-
-    protected val onCloseHandlers = CopyOnWriteArrayList<(Int, String?) -> Unit>()
-
     protected val coroutineScope = CoroutineScope(Dispatchers.IO)
-
-    protected val log by logger()
 
 
     protected val webSocket = configureNewWebSocket(httpClient, authentication).buildAsync(URI(url), object : java.net.http.WebSocket.Listener {
@@ -75,42 +65,9 @@ open class JavaHttpClientWebSocket(
     }
 
 
-    override fun onTextMessage(handler: (String) -> Unit) {
-        onTextMessageHandlers.add(handler)
-    }
-
-    protected open fun handleTextMessage(message: String) = coroutineScope.launch { // get off WebSocket thread to not block it for further messages
-        if (onTextMessageHandlers.isEmpty()) {
-            log.warn { "Retrieved message but no onTextMessage handlers are registered" }
-        } else {
-            onTextMessageHandlers.toList().forEach { handler -> launch {
-                try {
-                    handler(message)
-                } catch (e: Throwable) {
-                    log.error(e) { "$handler threw an error while handling message: $message" }
-                }
-            } }
-        }
-    }
-
-
-    override fun onError(handler: (error: Throwable?) -> Unit) {
-        onErrorHandlers.add(handler)
-    }
-
-    protected open fun invokeOnErrorHandlers(error: Throwable?) {
-        onErrorHandlers.toList().forEach { handler ->
-            handler(error)
-        }
-    }
-
-    override fun onClose(handler: (statusCode: Int, reason: String?) -> Unit) {
-        onCloseHandlers.add(handler)
-    }
-
-    protected open fun invokeOnCloseHandlers(statusCode: Int, reason: String?) {
-        onCloseHandlers.toList().forEach { handler ->
-            handler(statusCode, reason)
+    override fun handleTextMessage(message: String) {
+        coroutineScope.launch { // get off WebSocket thread to not block it for further messages
+            super.handleTextMessage(message)
         }
     }
 
