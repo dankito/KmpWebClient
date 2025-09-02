@@ -9,6 +9,8 @@ import net.dankito.datetime.Instant
 import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.auth.BasicAuthAuthentication
 import net.dankito.web.client.auth.BearerAuthentication
+import net.dankito.web.client.websocket.JavaHttpClientWebSocket
+import net.dankito.web.client.websocket.WebSocket
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.net.URI
@@ -62,6 +64,10 @@ open class JavaHttpClientWebClient(
 
             applyAuthentication(this, config.authentication)
         }
+
+
+    fun webSocket(url: String, authentication: Authentication? = null): WebSocket =
+        JavaHttpClientWebSocket(url, authentication, client)
 
 
     override suspend fun head(parameters: RequestParameters<Unit>): WebClientResult<Unit> = makeRequest("HEAD", parameters)
