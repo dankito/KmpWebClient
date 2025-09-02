@@ -7,6 +7,8 @@ abstract class WebSocketBase : WebSocket {
 
     protected val onTextMessageHandlers = mutableListOf<(String) -> Unit>() // TODO: make thread-safe
 
+    protected val onBinaryMessageHandlers = mutableListOf<(ByteArray) -> Unit>() // TODO: make thread-safe
+
     protected val onErrorHandlers = mutableListOf<(Throwable?) -> Unit>() // TODO: make thread-safe
 
     protected val onCloseHandlers = mutableListOf<(Int, String?) -> Unit>() // TODO: make thread-safe
@@ -26,15 +28,25 @@ abstract class WebSocketBase : WebSocket {
                 try {
                     handler(message)
                 } catch (e: Throwable) {
-                    log.error(e) { "$handler threw an error while handling message: $message" }
+                    log.error(e) { "$handler threw an error while handling text message: $message" }
                 }
             }
         }
     }
 
 
+    override fun onBinaryMessage(handler: (message: ByteArray) -> Unit) {
+        onBinaryMessageHandlers.add(handler)
+    }
+
     protected open fun handleBinaryMessage(message: ByteArray) {
-        // TODO
+        onBinaryMessageHandlers.toList().forEach { handler ->
+            try {
+                handler(message)
+            } catch (e: Throwable) {
+                log.error(e) { "$handler threw an error while handling binary message: $message" }
+            }
+        }
     }
 
 

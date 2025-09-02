@@ -9,6 +9,7 @@ import net.dankito.web.client.auth.BasicAuthAuthentication
 import net.dankito.web.client.auth.BearerAuthentication
 import java.net.URI
 import java.net.http.HttpClient
+import java.nio.ByteBuffer
 import java.util.Base64
 import java.util.concurrent.CompletionStage
 
@@ -45,6 +46,17 @@ open class JavaHttpClientWebSocket(
             }
 
             return super.onText(webSocket, data, last)
+        }
+
+        override fun onBinary(webSocket: java.net.http.WebSocket, data: ByteBuffer, last: Boolean): CompletionStage<*>? {
+            if (last == false) {
+                log.error { "This is an error in our WebSocket implementation: It's not the last message chunk, but we " +
+                        "haven't implemented buffering partial binary messages yet. Please handle partial chunks yourself." }
+            }
+
+            handleBinaryMessage(data.array())
+
+            return super.onBinary(webSocket, data, last)
         }
 
         override fun onError(webSocket: java.net.http.WebSocket?, error: Throwable?) {

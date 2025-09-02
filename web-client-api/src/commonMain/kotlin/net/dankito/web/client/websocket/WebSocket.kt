@@ -4,6 +4,8 @@ interface WebSocket {
 
     fun onTextMessage(handler: (message: String) -> Unit)
 
+    fun onBinaryMessage(handler: (message: ByteArray) -> Unit)
+
     fun onError(handler: (error: Throwable?) -> Unit)
 
     fun onClose(handler: (statusCode: Int, reason: String?) -> Unit)
