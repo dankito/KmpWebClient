@@ -9,6 +9,7 @@ import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.compression.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.sse.*
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -22,6 +23,8 @@ import net.dankito.web.client.serialization.KotlinxJsonSerializer
 import net.dankito.web.client.serialization.Serializer
 import net.dankito.web.client.sse.KtorSseClient
 import net.dankito.web.client.sse.SseClient
+import net.dankito.web.client.websocket.KtorWebSocket
+import net.dankito.web.client.websocket.WebSocket
 
 open class KtorWebClient(
     protected val config: ClientConfig = ClientConfig(),
@@ -63,6 +66,8 @@ open class KtorWebClient(
 
 
     open val sse: SseClient by lazy { KtorSseClient(client) }
+
+    open fun webSocket(url: String, authentication: Authentication? = null): WebSocket = KtorWebSocket(url, authentication, client)
 
 
     protected val log by logger()
@@ -112,6 +117,8 @@ open class KtorWebClient(
                     }
                 }
             }
+
+            install(WebSockets)
 
             /**
              * SSEPlugin in Ktor (if installed but unused):

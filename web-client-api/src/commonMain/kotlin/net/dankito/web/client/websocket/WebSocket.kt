@@ -9,6 +9,6 @@ interface WebSocket {
     fun onClose(handler: (statusCode: Int, reason: String?) -> Unit)
 
 
-    fun close(reason: String? = null)
+    suspend fun close(code: Int = 1001, reason: String? = null)
 
 }

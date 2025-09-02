@@ -33,6 +33,11 @@ abstract class WebSocketBase : WebSocket {
     }
 
 
+    protected open fun handleBinaryMessage(message: ByteArray) {
+        // TODO
+    }
+
+
     override fun onError(handler: (error: Throwable?) -> Unit) {
         onErrorHandlers.add(handler)
     }
