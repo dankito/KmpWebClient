@@ -3,6 +3,7 @@ package net.dankito.web.client
 import assertk.assertThat
 import assertk.assertions.*
 import kotlinx.coroutines.test.runTest
+import java.io.InputStream
 import kotlin.test.Test
 
 class JavaHttpClientWebClientTest {
@@ -154,6 +155,33 @@ class JavaHttpClientWebClientTest {
 
         assertThat(response::successful).isTrue()
         assertThat(response::requestedUrl).isEqualTo(url)
+    }
+
+
+    @Test
+    fun downloadBinaryFileAsByteArray() = runTest {
+        val url = "https://github.com/iplocate/ip-address-databases/raw/refs/heads/main/ip-to-country/ip-to-country.csv.zip?download=true"
+
+        val response = underTest.get<ByteArray>(url)
+
+        assertThat(response::successful).isTrue()
+        assertThat(response::body).isNotNull()
+        assertThat(response.body!!.size).isGreaterThan(6_800_000)
+        assertThat(response.body!!.size).isLessThan(7_500_000) // before it was downloaded as String and larger than 12 MB instead of actual 6,8 MB
+    }
+
+    @Test
+    fun downloadBinaryFileAsInputStream() = runTest {
+        val url = "https://github.com/iplocate/ip-address-databases/raw/refs/heads/main/ip-to-country/ip-to-country.csv.zip?download=true"
+
+        val response = underTest.get<InputStream>(url)
+
+        assertThat(response::successful).isTrue()
+        assertThat(response::body).isNotNull()
+
+        val body = response.body!!.use { it.readBytes() }
+        assertThat(body.size).isGreaterThan(6_800_000)
+        assertThat(body.size).isLessThan(7_500_000) // before it was downloaded as String and larger than 12 MB instead of actual 6,8 MB
     }
 
 

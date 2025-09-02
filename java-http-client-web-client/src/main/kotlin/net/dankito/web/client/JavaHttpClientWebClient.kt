@@ -10,6 +10,7 @@ import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.auth.BasicAuthAuthentication
 import net.dankito.web.client.auth.BearerAuthentication
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.net.URI
 import java.net.URLEncoder
 import java.net.http.HttpClient
@@ -20,6 +21,7 @@ import java.util.*
 import java.util.zip.GZIPOutputStream
 import kotlin.text.replace
 
+@Suppress("UNCHECKED_CAST")
 open class JavaHttpClientWebClient(
     protected val config: ClientConfig = ClientConfig(),
 ) : WebClient {
@@ -86,8 +88,14 @@ open class JavaHttpClientWebClient(
             }
 
 //            val bodyHandler = JavaHttpResponseBodyHandler()
-            val bodyHandler = HttpResponse.BodyHandlers.ofString()
-            val response = client.sendAsync(request, bodyHandler).await()
+
+            val bodyHandler: HttpResponse.BodyHandler<out Any> = when (parameters.responseClass) {
+                ByteArray::class -> HttpResponse.BodyHandlers.ofByteArray()
+                InputStream::class -> HttpResponse.BodyHandlers.ofInputStream()
+                else -> HttpResponse.BodyHandlers.ofString()
+            }  as HttpResponse.BodyHandler<T>
+
+            val response = client.sendAsync(request, bodyHandler).await() as HttpResponse<T>
 
             mapResponse(method, parameters, response, requestTime)
         } catch (e: Throwable) {
@@ -183,7 +191,7 @@ open class JavaHttpClientWebClient(
     }
 
 
-    protected open fun <T : Any> mapResponse(method: String, parameters: RequestParameters<T>, response: HttpResponse<String>,
+    protected open fun <T : Any> mapResponse(method: String, parameters: RequestParameters<T>, response: HttpResponse<T>,
                                              requestTime: Instant): WebClientResult<T> {
         val url = response.uri().toString()
         val statusCode = response.statusCode()
@@ -204,10 +212,11 @@ open class JavaHttpClientWebClient(
                 WebClientResult(url, true, responseDetails, body = responseBody)
             } catch (e: Throwable) {
                 log.error(e) { "Error while mapping response of: $method $url, ${responseDetails.headersFirstValue}" }
-                WebClientResult(url, false, responseDetails, ClientErrorType.DeserializationError, WebClientException(e.message, e, responseDetails, response.body()))
+                WebClientResult(url, false, responseDetails, ClientErrorType.DeserializationError,
+                    WebClientException(e.message, e, responseDetails, response.body() as? String))
             }
         } else {
-            val responseBody = response.body()
+            val responseBody = response.body() as? String
             val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
 
             if (config.logErroneousResponses) {
@@ -220,19 +229,19 @@ open class JavaHttpClientWebClient(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    protected open fun <T : Any> decodeResponseBody(parameters: RequestParameters<T>, response: HttpResponse<String>): T {
-        val bodyString = response.body()
+    protected open fun <T : Any> decodeResponseBody(parameters: RequestParameters<T>, response: HttpResponse<T>): T {
         val responseClass = parameters.responseClass
 
         return if (responseClass == null || responseClass == Unit::class) {
             Unit as T
         } else if(responseClass == String::class) {
-            bodyString as T
+            response.body() as T
         } else if (responseClass == ByteArray::class) {
-            val bytes: ByteArray = bodyString.encodeToByteArray()
-            bytes as T
+            response.body() as T
+        }  else if (responseClass == InputStream::class) {
+            response.body() as T
         } else {
+            val bodyString = response.body() as String
             (parameters.serializer ?: config.serializer).deserialize(bodyString, responseClass,
                 parameters.responseGenericType1, parameters.responseGenericType2)
         }
