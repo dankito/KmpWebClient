@@ -1,5 +1,9 @@
 package net.dankito.web.client
 
+import net.dankito.web.client.auth.Authentication
+import net.dankito.web.client.websocket.WebSocket
+import net.dankito.web.client.websocket.WebSocketConfig
+
 interface WebClient {
 
     suspend fun head(parameters: RequestParameters<Unit>): WebClientResult<Unit>
@@ -16,6 +20,12 @@ interface WebClient {
      * To support custom HTTP methods like PROPFIND and REPORT (WebDAV).
      */
     suspend fun <T : Any> custom(httpMethod: String, parameters: RequestParameters<T>): WebClientResult<T>
+
+
+    fun webSocket(url: String, authentication: Authentication? = null): WebSocket =
+        webSocket(WebSocketConfig(url, authentication))
+
+    fun webSocket(config: WebSocketConfig): WebSocket
 
 }
 

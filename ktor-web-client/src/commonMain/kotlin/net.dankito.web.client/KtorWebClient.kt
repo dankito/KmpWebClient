@@ -67,10 +67,7 @@ open class KtorWebClient(
 
     open val sse: SseClient by lazy { KtorSseClient(client) }
 
-    open fun webSocket(url: String, authentication: Authentication? = null): WebSocket =
-        webSocket(WebSocketConfig(url, authentication))
-
-    open fun webSocket(config: WebSocketConfig): WebSocket =
+    override fun webSocket(config: WebSocketConfig): WebSocket =
         KtorWebSocket(config, client)
 
 

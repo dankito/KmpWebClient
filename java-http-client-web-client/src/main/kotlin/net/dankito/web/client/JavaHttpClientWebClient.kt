@@ -63,10 +63,7 @@ open class JavaHttpClientWebClient(
         }
 
 
-    fun webSocket(url: String, authentication: Authentication? = null): WebSocket =
-        webSocket(WebSocketConfig(url, authentication))
-
-    fun webSocket(config: WebSocketConfig): WebSocket =
+    override fun webSocket(config: WebSocketConfig): WebSocket =
         JavaHttpClientWebSocket(config, client)
 
 
