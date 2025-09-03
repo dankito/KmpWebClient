@@ -145,4 +145,6 @@ abstract class WebSocketBase(
         onCloseHandlers.clear()
     }
 
+    internal fun getSerializer() = serializer
+
 }
