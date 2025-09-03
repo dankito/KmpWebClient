@@ -72,7 +72,7 @@ open class KtorWebSocket(
     protected open suspend fun handleOnClose(reason: CloseReason?) {
         isOpen = false
 
-        invokeOnCloseHandlers(reason?.code?.toInt() ?: -1, reason?.message)
+        webSocketClosed(reason?.code?.toInt() ?: -1, reason?.message)
     }
 
 

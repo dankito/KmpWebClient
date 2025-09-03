@@ -121,10 +121,28 @@ abstract class WebSocketBase(
         onCloseHandlers.add(handler)
     }
 
+    protected open suspend fun webSocketClosed(statusCode: Int, reason: String?) {
+        invokeOnCloseHandlers(statusCode, reason)
+
+        cleanUp()
+    }
+
+    /**
+     * Do not call directly! Call [webSocketClosed] instead to also do necessary clean up.
+     */
     protected open suspend fun invokeOnCloseHandlers(statusCode: Int, reason: String?) {
         onCloseHandlers.toList().forEach { handler ->
             handler(statusCode, reason)
         }
+    }
+
+
+    protected open fun cleanUp() {
+        // remove all handlers to not leak memory
+        onTextMessageHandlers.clear()
+        onBinaryMessageHandlers.clear()
+        onErrorHandlers.clear()
+        onCloseHandlers.clear()
     }
 
 }

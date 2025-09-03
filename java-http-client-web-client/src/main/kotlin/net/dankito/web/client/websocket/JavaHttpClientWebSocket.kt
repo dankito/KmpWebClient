@@ -77,7 +77,7 @@ open class JavaHttpClientWebSocket(
 
         override fun onClose(webSocket: java.net.http.WebSocket?, statusCode: Int, reason: String?): CompletionStage<*>? {
             val future = coroutineScope.async {
-                invokeOnCloseHandlers(statusCode, reason)
+                webSocketClosed(statusCode, reason)
             }.asCompletableFuture()
 
             super.onClose(webSocket, statusCode, reason)
