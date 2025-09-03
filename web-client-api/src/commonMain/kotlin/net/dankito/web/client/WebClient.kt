@@ -23,11 +23,11 @@ interface WebClient {
     suspend fun <T : Any> custom(httpMethod: String, parameters: RequestParameters<T>): WebClientResult<T>
 
 
-    fun webSocket(url: String, queryParameters: Map<String, Any> = mapOf(), headers: Map<String, String> = mapOf(),
+    suspend fun webSocket(url: String, queryParameters: Map<String, Any> = mapOf(), headers: Map<String, String> = mapOf(),
                   userAgent: String? = DefaultUserAgent, authentication: Authentication? = null): WebSocket =
         webSocket(WebSocketConfig(url, queryParameters, headers, userAgent, authentication))
 
-    fun webSocket(config: WebSocketConfig): WebSocket
+    suspend fun webSocket(config: WebSocketConfig): WebSocket
 
 }
 

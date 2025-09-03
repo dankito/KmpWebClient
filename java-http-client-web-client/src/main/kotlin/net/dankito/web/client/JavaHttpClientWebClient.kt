@@ -63,7 +63,7 @@ open class JavaHttpClientWebClient(
         }
 
 
-    override fun webSocket(config: WebSocketConfig): WebSocket =
+    override suspend fun webSocket(config: WebSocketConfig): WebSocket =
         JavaHttpClientWebSocket(config, client, this.config)
 
 

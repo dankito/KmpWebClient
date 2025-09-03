@@ -16,44 +16,42 @@ import net.dankito.web.client.ClientConfig
 import net.dankito.web.client.KtorRequestConfigurer
 
 open class KtorWebSocket(
-    config: WebSocketConfig,
-    httpClient: HttpClient,
+    protected val session: DefaultWebSocketSession,
     clientConfig: ClientConfig,
     protected val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
 ) : WebSocketBase(clientConfig.serializer), WebSocket {
 
+    companion object {
+        suspend fun create(config: WebSocketConfig, httpClient: HttpClient, clientConfig: ClientConfig,
+                           requestConfigurer: KtorRequestConfigurer = KtorRequestConfigurer.Default): KtorWebSocket {
+            val finalConfig = mergeConfig(config, clientConfig)
 
-    protected lateinit var session: DefaultWebSocketSession
-
-    protected var isOpen = false // TODO: make thread safe
-
-    protected open val requestConfigurer: KtorRequestConfigurer = KtorRequestConfigurer.Default
-
-
-    init {
-        initWebSocket(config, httpClient, clientConfig)
-    }
-
-    protected open fun initWebSocket(config: WebSocketConfig, httpClient: HttpClient, clientConfig: ClientConfig) {
-        val finalConfig = mergeConfig(config, clientConfig)
-
-        coroutineScope.launch {
-            session = httpClient.webSocketSession(finalConfig.url) {
+            val session = httpClient.webSocketSession(finalConfig.url) {
                 requestConfigurer.configureRequest(this, finalConfig)
             }
 
-            isOpen = true
+            return KtorWebSocket(session, clientConfig)
+        }
 
+        fun mergeConfig(config: WebSocketConfig, clientConfig: ClientConfig) = WebSocketConfig(
+            config.url, config.queryParameters, config.headers,
+            config.userAgent ?: clientConfig.defaultUserAgent,
+            config.authentication ?: clientConfig.authentication,
+            config.cookies
+        )
+    }
+
+
+    protected var isOpen = false // TODO: make thread safe
+
+
+    init {
+        isOpen = true
+
+        coroutineScope.launch {
             receiveLoop(session)
         }
     }
-
-    protected open fun mergeConfig(config: WebSocketConfig, clientConfig: ClientConfig) = WebSocketConfig(
-        config.url, config.queryParameters, config.headers,
-        config.userAgent ?: clientConfig.defaultUserAgent,
-        config.authentication ?: clientConfig.authentication,
-        config.cookies
-    )
 
     protected open suspend fun receiveLoop(session: DefaultWebSocketSession) {
         while (isOpen) {

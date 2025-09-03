@@ -70,12 +70,12 @@ open class KtorWebClient(
 
     open val sse: SseClient by lazy { KtorSseClient(client) }
 
-    override fun webSocket(config: WebSocketConfig): WebSocket =
+    override suspend fun webSocket(config: WebSocketConfig): WebSocket =
         if (this.config.enableWebSocket == false) {
             throw IllegalStateException("To be enable to use WebSocket you need to set " +
                     "ClientConfig.enableWebSocket or the same named constructor parameter to true!")
         } else {
-            KtorWebSocket(config, client, this.config)
+            KtorWebSocket.create(config, client, this.config)
         }
 
 
