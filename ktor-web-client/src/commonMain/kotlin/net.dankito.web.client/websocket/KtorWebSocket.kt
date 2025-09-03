@@ -13,12 +13,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.dankito.web.client.KtorRequestConfigurer
+import net.dankito.web.client.serialization.Serializer
 
 open class KtorWebSocket(
     config: WebSocketConfig,
     httpClient: HttpClient,
+    serializer: Serializer? = null,
     protected val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
-) : WebSocketBase(), WebSocket {
+) : WebSocketBase(serializer), WebSocket {
 
 
     protected lateinit var session: DefaultWebSocketSession

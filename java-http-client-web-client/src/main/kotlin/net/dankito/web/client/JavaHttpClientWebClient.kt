@@ -64,7 +64,7 @@ open class JavaHttpClientWebClient(
 
 
     override fun webSocket(config: WebSocketConfig): WebSocket =
-        JavaHttpClientWebSocket(config, client)
+        JavaHttpClientWebSocket(config, client, this.config.serializer)
 
 
     override suspend fun head(parameters: RequestParameters<Unit>): WebClientResult<Unit> = makeRequest("HEAD", parameters)

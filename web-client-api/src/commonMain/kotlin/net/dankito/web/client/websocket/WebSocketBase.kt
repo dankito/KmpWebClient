@@ -1,8 +1,12 @@
 package net.dankito.web.client.websocket
 
 import net.codinux.log.logger
+import net.dankito.web.client.serialization.Serializer
+import kotlin.reflect.KClass
 
-abstract class WebSocketBase : WebSocket {
+abstract class WebSocketBase(
+    protected val serializer: Serializer? = null,
+) : WebSocket {
 
 
     protected val onTextMessageHandlers = mutableListOf<(String) -> Unit>() // TODO: make thread-safe
@@ -29,6 +33,37 @@ abstract class WebSocketBase : WebSocket {
                     handler(message)
                 } catch (e: Throwable) {
                     log.error(e) { "$handler threw an error while handling text message: $message" }
+                }
+            }
+        }
+    }
+
+    override fun <T : Any> onDeserializedTextMessage(typeClass: KClass<T>, genericType1: KClass<*>?, genericType2: KClass<*>?,
+                                                     serializer: Serializer?, handler: (T?, String, Throwable?) -> Unit) {
+        val serializer = serializer ?: this.serializer
+        if (serializer != null) {
+            onTextMessage { message ->
+                try {
+                    val deserialized = serializer.deserialize(message, typeClass, genericType1, genericType2)
+                    handler(deserialized, message, null)
+                } catch (e: Throwable) {
+                    log.error(e) { "Deserializing WebSocket message to $typeClass failed" }
+                    handler(null, message, e)
+                }
+            }
+        }
+    }
+
+    override fun <T : Any> onSuccessfullyDeserializedTextMessage(typeClass: KClass<T>, genericType1: KClass<*>?, genericType2: KClass<*>?,
+                                                     serializer: Serializer?, handler: (T) -> Unit) {
+        val serializer = serializer ?: this.serializer
+        if (serializer != null) {
+            onTextMessage { message ->
+                try {
+                    val deserialized = serializer.deserialize(message, typeClass, genericType1, genericType2)
+                    handler(deserialized)
+                } catch (e: Throwable) {
+                    log.error(e) { "Deserializing WebSocket message to $typeClass failed" }
                 }
             }
         }

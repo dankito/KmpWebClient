@@ -5,14 +5,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import net.dankito.web.client.JavaHttpClientRequestConfigurer
+import net.dankito.web.client.serialization.Serializer
 import java.net.http.HttpClient
 import java.nio.ByteBuffer
 import java.util.concurrent.CompletionStage
 
 open class JavaHttpClientWebSocket(
     config: WebSocketConfig,
-    httpClient: HttpClient = defaultHttpClient()
-) : WebSocketBase(), WebSocket {
+    httpClient: HttpClient = defaultHttpClient(),
+    serializer: Serializer? = null,
+) : WebSocketBase(serializer), WebSocket {
 
     companion object {
         fun defaultHttpClient(): HttpClient = HttpClient.newBuilder()

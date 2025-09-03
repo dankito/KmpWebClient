@@ -71,7 +71,7 @@ open class KtorWebClient(
     open val sse: SseClient by lazy { KtorSseClient(client) }
 
     override fun webSocket(config: WebSocketConfig): WebSocket =
-        KtorWebSocket(config, client)
+        KtorWebSocket(config, client, this.config.serializer)
 
 
     protected open val requestConfigurer: KtorRequestConfigurer = KtorRequestConfigurer.Default
