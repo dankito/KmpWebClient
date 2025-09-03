@@ -11,13 +11,13 @@ abstract class WebSocketBase(
     protected abstract suspend fun doSendTextMessage(message: String)
 
 
-    protected val onTextMessageHandlers = mutableListOf<(String) -> Unit>() // TODO: make thread-safe
+    protected val onTextMessageHandlers = mutableListOf<suspend (String) -> Unit>() // TODO: make thread-safe
 
-    protected val onBinaryMessageHandlers = mutableListOf<(ByteArray) -> Unit>() // TODO: make thread-safe
+    protected val onBinaryMessageHandlers = mutableListOf<suspend (ByteArray) -> Unit>() // TODO: make thread-safe
 
-    protected val onErrorHandlers = mutableListOf<(Throwable?) -> Unit>() // TODO: make thread-safe
+    protected val onErrorHandlers = mutableListOf<suspend (Throwable?) -> Unit>() // TODO: make thread-safe
 
-    protected val onCloseHandlers = mutableListOf<(Int, String?) -> Unit>() // TODO: make thread-safe
+    protected val onCloseHandlers = mutableListOf<suspend (Int, String?) -> Unit>() // TODO: make thread-safe
 
     protected val log by logger()
 
@@ -36,11 +36,11 @@ abstract class WebSocketBase(
     }
 
 
-    override fun onTextMessage(handler: (String) -> Unit) {
+    override fun onTextMessage(handler: suspend (String) -> Unit) {
         onTextMessageHandlers.add(handler)
     }
 
-    protected open fun handleTextMessage(message: String) {
+    protected open suspend fun handleTextMessage(message: String) {
         if (onTextMessageHandlers.isEmpty()) {
             log.warn { "Retrieved message but no onTextMessage handlers are registered" }
         } else {
@@ -56,7 +56,7 @@ abstract class WebSocketBase(
 
     override fun <T : Any> onDeserializedTextMessage(typeClass: KClass<T>, genericType1: KClass<*>?, genericType2: KClass<*>?,
                                                      messageFilter: ((message: String) -> Boolean)?, serializer: Serializer?,
-                                                     handler: (T?, String, Throwable?) -> Unit) {
+                                                     handler: suspend (T?, String, Throwable?) -> Unit) {
         val serializer = serializer ?: this.serializer
         if (serializer != null) {
             onTextMessage { message ->
@@ -75,7 +75,7 @@ abstract class WebSocketBase(
 
     override fun <T : Any> onSuccessfullyDeserializedTextMessage(typeClass: KClass<T>, genericType1: KClass<*>?, genericType2: KClass<*>?,
                                                                  messageFilter: ((message: String) -> Boolean)?, serializer: Serializer?,
-                                                                 handler: (T) -> Unit) {
+                                                                 handler: suspend (T) -> Unit) {
         val serializer = serializer ?: this.serializer
         if (serializer != null) {
             onTextMessage { message ->
@@ -92,11 +92,11 @@ abstract class WebSocketBase(
     }
 
 
-    override fun onBinaryMessage(handler: (message: ByteArray) -> Unit) {
+    override fun onBinaryMessage(handler: suspend (message: ByteArray) -> Unit) {
         onBinaryMessageHandlers.add(handler)
     }
 
-    protected open fun handleBinaryMessage(message: ByteArray) {
+    protected open suspend fun handleBinaryMessage(message: ByteArray) {
         onBinaryMessageHandlers.toList().forEach { handler ->
             try {
                 handler(message)
@@ -107,21 +107,21 @@ abstract class WebSocketBase(
     }
 
 
-    override fun onError(handler: (error: Throwable?) -> Unit) {
+    override fun onError(handler: suspend (error: Throwable?) -> Unit) {
         onErrorHandlers.add(handler)
     }
 
-    protected open fun invokeOnErrorHandlers(error: Throwable?) {
+    protected open suspend fun invokeOnErrorHandlers(error: Throwable?) {
         onErrorHandlers.toList().forEach { handler ->
             handler(error)
         }
     }
 
-    override fun onClose(handler: (statusCode: Int, reason: String?) -> Unit) {
+    override fun onClose(handler: suspend (statusCode: Int, reason: String?) -> Unit) {
         onCloseHandlers.add(handler)
     }
 
-    protected open fun invokeOnCloseHandlers(statusCode: Int, reason: String?) {
+    protected open suspend fun invokeOnCloseHandlers(statusCode: Int, reason: String?) {
         onCloseHandlers.toList().forEach { handler ->
             handler(statusCode, reason)
         }

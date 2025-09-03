@@ -2,6 +2,8 @@ package net.dankito.web.client.websocket
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import net.dankito.web.client.ClientConfig
@@ -32,19 +34,22 @@ open class JavaHttpClientWebSocket(
         private val buffer = StringBuilder()
 
         override fun onText(webSocket: java.net.http.WebSocket, data: CharSequence, last: Boolean): CompletionStage<*>? {
-            if (last == false) { // partial message (large messages sometimes get broken into parts/chunks) -> add to buffer
-                buffer.append(data)
-            } else {
-                if (buffer.isEmpty()) { // full message at once
-                    handleTextMessage(data.toString())
-                } else { // last part of chunked message retrieved
+            val future = coroutineScope.async {
+                if (last == false) { // partial message (large messages sometimes get broken into parts/chunks) -> add to buffer
                     buffer.append(data)
-                    handleTextMessage(buffer.toString())
-                    buffer.clear()
+                } else {
+                    if (buffer.isEmpty()) { // full message at once
+                        handleTextMessage(data.toString())
+                    } else { // last part of chunked message retrieved
+                        buffer.append(data)
+                        handleTextMessage(buffer.toString())
+                        buffer.clear()
+                    }
                 }
-            }
+            }.asCompletableFuture()
 
-            return super.onText(webSocket, data, last)
+            super.onText(webSocket, data, last)
+            return future
         }
 
         override fun onBinary(webSocket: java.net.http.WebSocket, data: ByteBuffer, last: Boolean): CompletionStage<*>? {
@@ -53,19 +58,30 @@ open class JavaHttpClientWebSocket(
                         "haven't implemented buffering partial binary messages yet. Please handle partial chunks yourself." }
             }
 
-            handleBinaryMessage(data.array())
+            val future = coroutineScope.async {
+                handleBinaryMessage(data.array())
+            }.asCompletableFuture()
 
-            return super.onBinary(webSocket, data, last)
+            super.onBinary(webSocket, data, last)
+
+            return future
         }
 
         override fun onError(webSocket: java.net.http.WebSocket?, error: Throwable?) {
-            invokeOnErrorHandlers(error)
+            coroutineScope.async {
+                invokeOnErrorHandlers(error)
+            }
+
             super.onError(webSocket, error)
         }
 
         override fun onClose(webSocket: java.net.http.WebSocket?, statusCode: Int, reason: String?): CompletionStage<*>? {
-            invokeOnCloseHandlers(statusCode, reason)
-            return super.onClose(webSocket, statusCode, reason)
+            val future = coroutineScope.async {
+                invokeOnCloseHandlers(statusCode, reason)
+            }.asCompletableFuture()
+
+            super.onClose(webSocket, statusCode, reason)
+            return future
         }
     }).join()
 
@@ -86,7 +102,7 @@ open class JavaHttpClientWebSocket(
     }
 
 
-    override fun handleTextMessage(message: String) {
+    override suspend fun handleTextMessage(message: String) {
         coroutineScope.launch { // get off WebSocket thread to not block it for further messages
             super.handleTextMessage(message)
         }

@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 
 interface WebSocket {
 
-    fun onTextMessage(handler: (message: String) -> Unit)
+    fun onTextMessage(handler: suspend (message: String) -> Unit)
 
     /**
      * `handler` will be called in both cases, if deserialization succeeds or fails.
@@ -18,7 +18,7 @@ interface WebSocket {
      */
     fun <T : Any> onDeserializedTextMessage(typeClass: KClass<T>, genericType1: KClass<*>? = null, genericType2: KClass<*>? = null,
                                             messageFilter: ((message: String) -> Boolean)? = null, serializer: Serializer? = null,
-                                            handler: (T?, originalMessage: String, error: Throwable?) -> Unit)
+                                            handler: suspend (T?, originalMessage: String, error: Throwable?) -> Unit)
 
     /**
      * `handler` will only be called if deserialization succeeds.
@@ -31,13 +31,13 @@ interface WebSocket {
      */
     fun <T : Any> onSuccessfullyDeserializedTextMessage(typeClass: KClass<T>, genericType1: KClass<*>? = null, genericType2: KClass<*>? = null,
                                                         messageFilter: ((message: String) -> Boolean)? = null, serializer: Serializer? = null,
-                                                        handler: (T) -> Unit)
+                                                        handler: suspend (T) -> Unit)
 
-    fun onBinaryMessage(handler: (message: ByteArray) -> Unit)
+    fun onBinaryMessage(handler: suspend (message: ByteArray) -> Unit)
 
-    fun onError(handler: (error: Throwable?) -> Unit)
+    fun onError(handler: suspend (error: Throwable?) -> Unit)
 
-    fun onClose(handler: (statusCode: Int, reason: String?) -> Unit)
+    fun onClose(handler: suspend (statusCode: Int, reason: String?) -> Unit)
 
 
     suspend fun sendTextMessage(message: Any)
