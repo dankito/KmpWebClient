@@ -9,7 +9,7 @@ open class WebSocketConfig(
 
     open val queryParameters: Map<String, Any> = mapOf(),
 
-    open val headers: Map<String, String> = mutableMapOf(),
+    open val headers: Map<String, String> = mapOf(),
     open val userAgent: String? = DefaultUserAgent,
 
     open val authentication: Authentication? = null,

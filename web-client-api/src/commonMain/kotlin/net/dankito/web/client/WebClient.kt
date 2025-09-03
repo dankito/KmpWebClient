@@ -1,5 +1,6 @@
 package net.dankito.web.client
 
+import net.dankito.web.client.RequestParameters.Companion.DefaultUserAgent
 import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.websocket.WebSocket
 import net.dankito.web.client.websocket.WebSocketConfig
@@ -22,8 +23,9 @@ interface WebClient {
     suspend fun <T : Any> custom(httpMethod: String, parameters: RequestParameters<T>): WebClientResult<T>
 
 
-    fun webSocket(url: String, authentication: Authentication? = null): WebSocket =
-        webSocket(WebSocketConfig(url, authentication = authentication))
+    fun webSocket(url: String, queryParameters: Map<String, Any> = mapOf(), headers: Map<String, String> = mapOf(),
+                  userAgent: String? = DefaultUserAgent, authentication: Authentication? = null): WebSocket =
+        webSocket(WebSocketConfig(url, queryParameters, headers, userAgent, authentication))
 
     fun webSocket(config: WebSocketConfig): WebSocket
 
