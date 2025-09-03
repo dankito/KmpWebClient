@@ -75,7 +75,7 @@ open class KtorWebClient(
             throw IllegalStateException("To be enable to use WebSocket you need to set " +
                     "ClientConfig.enableWebSocket or the same named constructor parameter to true!")
         } else {
-            KtorWebSocket(config, client, this.config.serializer)
+            KtorWebSocket(config, client, this.config)
         }
 
 

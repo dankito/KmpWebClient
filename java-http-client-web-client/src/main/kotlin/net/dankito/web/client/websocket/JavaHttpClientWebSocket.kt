@@ -4,8 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
+import net.dankito.web.client.ClientConfig
 import net.dankito.web.client.JavaHttpClientRequestConfigurer
-import net.dankito.web.client.serialization.Serializer
 import java.net.http.HttpClient
 import java.nio.ByteBuffer
 import java.util.concurrent.CompletionStage
@@ -13,8 +13,8 @@ import java.util.concurrent.CompletionStage
 open class JavaHttpClientWebSocket(
     config: WebSocketConfig,
     httpClient: HttpClient = defaultHttpClient(),
-    serializer: Serializer? = null,
-) : WebSocketBase(serializer), WebSocket {
+    clientConfig: ClientConfig,
+) : WebSocketBase(clientConfig.serializer), WebSocket {
 
     companion object {
         fun defaultHttpClient(): HttpClient = HttpClient.newBuilder()
@@ -28,7 +28,7 @@ open class JavaHttpClientWebSocket(
     protected open val requestConfigurer = JavaHttpClientRequestConfigurer.Default
 
 
-    protected val webSocket = configureNewWebSocket(httpClient, config).buildAsync(requestConfigurer.buildUrl(config), object : java.net.http.WebSocket.Listener {
+    protected val webSocket = configureNewWebSocket(httpClient, config, clientConfig).buildAsync(requestConfigurer.buildUrl(config), object : java.net.http.WebSocket.Listener {
         private val buffer = StringBuilder()
 
         override fun onText(webSocket: java.net.http.WebSocket, data: CharSequence, last: Boolean): CompletionStage<*>? {
@@ -84,12 +84,20 @@ open class JavaHttpClientWebSocket(
     }
 
 
-    protected open fun configureNewWebSocket(httpClient: HttpClient, config: WebSocketConfig): java.net.http.WebSocket.Builder {
+    protected open fun configureNewWebSocket(httpClient: HttpClient, config: WebSocketConfig, clientConfig: ClientConfig): java.net.http.WebSocket.Builder {
+        val finalConfig = mergeConfig(config, clientConfig)
         val builder = httpClient.newWebSocketBuilder()
 
-        requestConfigurer.configureRequest(builder, config)
+        requestConfigurer.configureRequest(builder, finalConfig)
 
         return builder
     }
+
+    protected open fun mergeConfig(config: WebSocketConfig, clientConfig: ClientConfig) = WebSocketConfig(
+        config.url, config.queryParameters, config.headers,
+        config.userAgent ?: clientConfig.defaultUserAgent,
+        config.authentication ?: clientConfig.authentication,
+        config.cookies
+    )
 
 }

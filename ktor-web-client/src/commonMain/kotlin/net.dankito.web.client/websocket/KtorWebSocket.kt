@@ -12,15 +12,15 @@ import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.dankito.web.client.ClientConfig
 import net.dankito.web.client.KtorRequestConfigurer
-import net.dankito.web.client.serialization.Serializer
 
 open class KtorWebSocket(
     config: WebSocketConfig,
     httpClient: HttpClient,
-    serializer: Serializer? = null,
+    clientConfig: ClientConfig,
     protected val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
-) : WebSocketBase(serializer), WebSocket {
+) : WebSocketBase(clientConfig.serializer), WebSocket {
 
 
     protected lateinit var session: DefaultWebSocketSession
@@ -31,13 +31,15 @@ open class KtorWebSocket(
 
 
     init {
-        initWebSocket(config, httpClient)
+        initWebSocket(config, httpClient, clientConfig)
     }
 
-    protected open fun initWebSocket(config: WebSocketConfig, httpClient: HttpClient) {
+    protected open fun initWebSocket(config: WebSocketConfig, httpClient: HttpClient, clientConfig: ClientConfig) {
+        val finalConfig = mergeConfig(config, clientConfig)
+
         coroutineScope.launch {
-            session = httpClient.webSocketSession(config.url) {
-                requestConfigurer.configureRequest(this, config)
+            session = httpClient.webSocketSession(finalConfig.url) {
+                requestConfigurer.configureRequest(this, finalConfig)
             }
 
             isOpen = true
@@ -45,6 +47,13 @@ open class KtorWebSocket(
             receiveLoop(session)
         }
     }
+
+    protected open fun mergeConfig(config: WebSocketConfig, clientConfig: ClientConfig) = WebSocketConfig(
+        config.url, config.queryParameters, config.headers,
+        config.userAgent ?: clientConfig.defaultUserAgent,
+        config.authentication ?: clientConfig.authentication,
+        config.cookies
+    )
 
     protected open suspend fun receiveLoop(session: DefaultWebSocketSession) {
         while (isOpen) {
