@@ -23,7 +23,7 @@ interface WebClient {
 
 
     fun webSocket(url: String, authentication: Authentication? = null): WebSocket =
-        webSocket(WebSocketConfig(url, authentication))
+        webSocket(WebSocketConfig(url, authentication = authentication))
 
     fun webSocket(config: WebSocketConfig): WebSocket
 
