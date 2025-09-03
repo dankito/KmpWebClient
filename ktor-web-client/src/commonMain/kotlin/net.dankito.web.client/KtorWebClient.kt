@@ -15,7 +15,6 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.*
-import io.ktor.util.date.*
 import kotlinx.serialization.InternalSerializationApi
 import net.codinux.log.logger
 import net.dankito.web.client.auth.*
@@ -25,6 +24,7 @@ import net.dankito.web.client.sse.KtorSseClient
 import net.dankito.web.client.sse.SseClient
 import net.dankito.web.client.websocket.KtorWebSocket
 import net.dankito.web.client.websocket.WebSocket
+import net.dankito.web.client.websocket.WebSocketConfig
 
 open class KtorWebClient(
     protected val config: ClientConfig = ClientConfig(),
@@ -67,7 +67,11 @@ open class KtorWebClient(
 
     open val sse: SseClient by lazy { KtorSseClient(client) }
 
-    open fun webSocket(url: String, authentication: Authentication? = null): WebSocket = KtorWebSocket(url, authentication, client)
+    open fun webSocket(url: String, authentication: Authentication? = null): WebSocket =
+        webSocket(WebSocketConfig(url, authentication))
+
+    open fun webSocket(config: WebSocketConfig): WebSocket =
+        KtorWebSocket(config, client)
 
 
     protected open val requestConfigurer: KtorRequestConfigurer = KtorRequestConfigurer.Default

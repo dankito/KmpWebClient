@@ -1,11 +1,24 @@
 package net.dankito.web.client
 
-import io.ktor.client.plugins.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.util.date.*
+import io.ktor.client.plugins.compression.compress
+import io.ktor.client.plugins.timeout
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.accept
+import io.ktor.client.request.basicAuth
+import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.cookie
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
+import io.ktor.http.appendPathSegments
+import io.ktor.http.contentType
+import io.ktor.http.takeFrom
+import io.ktor.http.userAgent
+import io.ktor.util.date.GMTDate
+import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.auth.BasicAuthAuthentication
 import net.dankito.web.client.auth.BearerAuthentication
+import net.dankito.web.client.websocket.WebSocketConfig
 
 open class KtorRequestConfigurer {
 
@@ -17,28 +30,8 @@ open class KtorRequestConfigurer {
     open fun <T : Any> configureRequest(builder: HttpRequestBuilder, method: HttpMethod, parameters: RequestParameters<T>, config: ClientConfig) = builder.apply {
         this.method = method
 
-        url {
-            val url = parameters.url.replace(" ", "%20") // is not a real encoding, but at least encodes white spaces
-            if (url.startsWith("http", true)) { // absolute url
-                takeFrom(url)
-            } else { // relative url
-                appendPathSegments(url)
-            }
-
-            parameters.queryParameters.forEach { (name, value) -> this.parameters.append(name, value.toString()) }
-        }
-
-        parameters.headers.forEach { (name, value) ->
-            this.headers.append(name, value)
-        }
-
-        parameters.cookies.forEach { cookie ->
-            this.cookie(cookie.name, cookie.value, 0, cookie.expiresAt?.let { GMTDate(it) }, cookie.domain, cookie.path, cookie.secure, cookie.httpOnly)
-        }
-
-        parameters.userAgent?.let {
-            this.userAgent(it)
-        }
+        configureCommonConfig(builder, parameters.url, parameters.queryParameters, parameters.authentication,
+            parameters.headers, parameters.userAgent, parameters.cookies)
 
         this.accept(ContentType.parse(parameters.accept ?: config.defaultAccept))
 
@@ -54,8 +47,40 @@ open class KtorRequestConfigurer {
 
             setBody(it)
         }
+    }
 
-        parameters.authentication?.let { authentication ->
+
+    open fun configureRequest(builder: HttpRequestBuilder, config: WebSocketConfig) {
+        configureCommonConfig(builder, config.url, config.queryParameters, config.authentication, config.headers, config.userAgent, config.cookies)
+    }
+
+    protected open fun configureCommonConfig(builder: HttpRequestBuilder, url: String, queryParameters: Map<String, Any>, authentication: Authentication?,
+                                             headers: Map<String, String>, userAgent: String?, cookies: List<Cookie>) = builder.apply {
+        url {
+            val url = url.replace(" ", "%20") // is not a real encoding, but at least encodes white spaces
+            if (url.startsWith("http", true) || url.startsWith("ws", true)) { // absolute url
+                takeFrom(url)
+            } else { // relative url
+                appendPathSegments(url)
+            }
+
+            queryParameters.forEach { (name, value) -> this.parameters.append(name, value.toString()) }
+        }
+
+        headers.forEach { (name, value) ->
+            this.headers.append(name, value)
+        }
+
+        userAgent?.let {
+            this.userAgent(userAgent)
+        }
+
+        cookies.forEach { cookie ->
+            this.cookie(cookie.name, cookie.value, 0, cookie.expiresAt?.let { GMTDate(it) }, cookie.domain, cookie.path, cookie.secure, cookie.httpOnly)
+        }
+
+
+        authentication?.let { authentication ->
             (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
                 this.basicAuth(basicAuth.username, basicAuth.password)
             }

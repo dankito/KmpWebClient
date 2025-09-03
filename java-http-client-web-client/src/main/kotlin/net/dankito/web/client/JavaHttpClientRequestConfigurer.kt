@@ -3,10 +3,12 @@ package net.dankito.web.client
 import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.auth.BasicAuthAuthentication
 import net.dankito.web.client.auth.BearerAuthentication
+import net.dankito.web.client.websocket.WebSocketConfig
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.URLEncoder
 import java.net.http.HttpRequest
+import java.net.http.WebSocket
 import java.time.Duration
 import java.util.*
 import java.util.zip.GZIPOutputStream
@@ -23,15 +25,31 @@ open class JavaHttpClientRequestConfigurer {
 
         parameters.requestTimeoutMillis?.let { timeout(Duration.ofMillis(it)) }
 
-        setHeaders(this, parameters, config)
+        val headers = createHeaderMap(parameters.headers, parameters.authentication, parameters.userAgent, parameters.accept ?: config.defaultAccept, parameters.cookies)
+        if (parameters.body != null) {
+            headers.put("Content-Type", parameters.contentType ?: config.defaultContentType)
+        }
+        headers.forEach { (name, value) -> requestBuilder.setHeader(name, value) }
 
         method(method, getRequestBody(parameters, config))
-
-        applyAuthentication(this, parameters.authentication)
     }
 
-    open fun <T : Any> buildUrl(baseUrl: String?, parameters: RequestParameters<T>): String {
-        val relOrAbsUrl = parameters.url
+
+    open fun configureRequest(builder: WebSocket.Builder, config: WebSocketConfig) {
+        val headers = createHeaderMap(config.headers, config.authentication, config.userAgent, null, config.cookies)
+
+        headers.forEach { (name, value) -> builder.header(name, value) }
+    }
+
+
+    open fun <T : Any> buildUrl(baseUrl: String?, parameters: RequestParameters<T>) =
+        buildUrl(baseUrl, parameters.url, parameters.queryParameters)
+
+    open fun buildUrl(config: WebSocketConfig) =
+        URI(buildUrl(null, config.url, config.queryParameters))
+
+    open fun buildUrl(baseUrl: String?, url: String, queryParameters: Map<String, Any> = emptyMap()): String {
+        val relOrAbsUrl = url
 
         val withoutQueryParameters = if (baseUrl != null && relOrAbsUrl.startsWith("http://", true) == false && relOrAbsUrl.startsWith("https://", true) == false) {
             // URI(baseUrl).resolve(url) is too stupid to add '/' if necessary or merge two '/', so do it manually
@@ -40,10 +58,10 @@ open class JavaHttpClientRequestConfigurer {
             relOrAbsUrl
         }
 
-        return if (parameters.queryParameters.isEmpty()) {
+        return if (queryParameters.isEmpty()) {
             withoutQueryParameters
         } else {
-            val query = parameters.queryParameters.entries.joinToString("&", "?") { (name, value) ->
+            val query = queryParameters.entries.joinToString("&", "?") { (name, value) ->
                 "${URLEncoder.encode(name, Charsets.UTF_8)}=${URLEncoder.encode(value.toString(), Charsets.UTF_8)}"
             }
             withoutQueryParameters + query
@@ -51,32 +69,31 @@ open class JavaHttpClientRequestConfigurer {
             .replace(" ", "%20") // is not a real encoding, but at least encodes white spaces
     }
 
-    protected open fun <T : Any> setHeaders(requestBuilder: HttpRequest.Builder, parameters: RequestParameters<T>, config: ClientConfig) {
+    protected open fun createHeaderMap(headers: Map<String, String>, authentication: Authentication?, userAgent: String?,
+                                       accept: String? = null, cookies: List<Cookie> = emptyList()): MutableMap<String, String> {
         val headers = mutableMapOf<String, String>()
 
-        parameters.headers.forEach { (name, value) -> headers.put(name, value) }
-        parameters.cookies.forEach { cookie -> headers.put("Cookie", "${cookie.name}=${cookie.value}") } // TODO: build Cookie header
+        headers.forEach { (name, value) -> headers.put(name, value) }
+        cookies.forEach { cookie -> headers.put("Cookie", "${cookie.name}=${cookie.value}") } // TODO: build Cookie header
 
-        parameters.userAgent?.let { requestBuilder.header("User-Agent", it) }
+        userAgent?.let { headers.put("User-Agent", it) }
 
-        headers.put("Accept", parameters.accept ?: config.defaultAccept)
-        if (parameters.body != null) {
-            headers.put("Content-Type", parameters.contentType ?: config.defaultContentType)
+        accept?.let {
+            headers.put("Accept", accept)
         }
 
-        headers.forEach { (name, value) -> requestBuilder.setHeader(name, value) }
+        createAuthorizationHeaderValue(authentication)?.let { authHeaderValue ->
+            headers["Authorization"] = authHeaderValue
+        }
+
+        return headers
     }
 
-    open fun applyAuthentication(request: HttpRequest.Builder, authentication: Authentication?) {
-        (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
-            val authHeader = "Basic " + Base64.getEncoder()
-                .encodeToString("${basicAuth.username}:${basicAuth.password}".toByteArray())
-            request.header("Authorization", authHeader)
-        }
-
-        (authentication as? BearerAuthentication)?.let { bearerAuth ->
-            request.header("Authorization", "Bearer ${bearerAuth.bearerToken}")
-        }
+    open fun createAuthorizationHeaderValue(auth: Authentication?): String? = when (auth) {
+        is BearerAuthentication -> "Bearer ${auth.bearerToken}"
+        is BasicAuthAuthentication -> "Basic " + Base64.getEncoder()
+            .encodeToString("${auth.username}:${auth.password}".toByteArray())
+        else -> null
     }
 
 

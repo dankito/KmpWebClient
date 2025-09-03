@@ -7,21 +7,14 @@ import kotlinx.coroutines.withContext
 import net.codinux.log.logger
 import net.dankito.datetime.Instant
 import net.dankito.web.client.auth.Authentication
-import net.dankito.web.client.auth.BasicAuthAuthentication
-import net.dankito.web.client.auth.BearerAuthentication
 import net.dankito.web.client.websocket.JavaHttpClientWebSocket
 import net.dankito.web.client.websocket.WebSocket
-import java.io.ByteArrayOutputStream
+import net.dankito.web.client.websocket.WebSocketConfig
 import java.io.InputStream
-import java.net.URI
-import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
-import java.util.*
-import java.util.zip.GZIPOutputStream
-import kotlin.text.replace
 
 @Suppress("UNCHECKED_CAST")
 open class JavaHttpClientWebClient(
@@ -56,6 +49,10 @@ open class JavaHttpClientWebClient(
             header("Content-Type", config.defaultContentType)
             header("Accept", config.defaultAccept)
 
+            requestConfigurer.createAuthorizationHeaderValue(config.authentication)?.let {
+                header("Authorization", it)
+            }
+
             config.requestTimeoutMillis?.let {
                 timeout(Duration.ofMillis(it))
             }
@@ -63,13 +60,14 @@ open class JavaHttpClientWebClient(
             if (config.enableBodyCompression) {
                 // TODO
             }
-
-            requestConfigurer.applyAuthentication(this, config.authentication)
         }
 
 
     fun webSocket(url: String, authentication: Authentication? = null): WebSocket =
-        JavaHttpClientWebSocket(url, authentication, client)
+        webSocket(WebSocketConfig(url, authentication))
+
+    fun webSocket(config: WebSocketConfig): WebSocket =
+        JavaHttpClientWebSocket(config, client)
 
 
     override suspend fun head(parameters: RequestParameters<Unit>): WebClientResult<Unit> = makeRequest("HEAD", parameters)

@@ -4,18 +4,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
-import net.dankito.web.client.auth.Authentication
-import net.dankito.web.client.auth.BasicAuthAuthentication
-import net.dankito.web.client.auth.BearerAuthentication
-import java.net.URI
+import net.dankito.web.client.JavaHttpClientRequestConfigurer
 import java.net.http.HttpClient
 import java.nio.ByteBuffer
-import java.util.Base64
 import java.util.concurrent.CompletionStage
 
 open class JavaHttpClientWebSocket(
-    url: String,
-    authentication: Authentication? = null,
+    config: WebSocketConfig,
     httpClient: HttpClient = defaultHttpClient()
 ) : WebSocketBase(), WebSocket {
 
@@ -28,8 +23,10 @@ open class JavaHttpClientWebSocket(
 
     protected val coroutineScope = CoroutineScope(Dispatchers.IO)
 
+    protected open val requestConfigurer = JavaHttpClientRequestConfigurer.Default
 
-    protected val webSocket = configureNewWebSocket(httpClient, authentication).buildAsync(URI(url), object : java.net.http.WebSocket.Listener {
+
+    protected val webSocket = configureNewWebSocket(httpClient, config).buildAsync(requestConfigurer.buildUrl(config), object : java.net.http.WebSocket.Listener {
         private val buffer = StringBuilder()
 
         override fun onText(webSocket: java.net.http.WebSocket, data: CharSequence, last: Boolean): CompletionStage<*>? {
@@ -85,18 +82,10 @@ open class JavaHttpClientWebSocket(
     }
 
 
-    protected open fun configureNewWebSocket(httpClient: HttpClient, authentication: Authentication?): java.net.http.WebSocket.Builder {
+    protected open fun configureNewWebSocket(httpClient: HttpClient, config: WebSocketConfig): java.net.http.WebSocket.Builder {
         val builder = httpClient.newWebSocketBuilder()
 
-        (authentication as? BasicAuthAuthentication)?.let { basicAuth ->
-            val authHeader = "Basic " + Base64.getEncoder()
-                .encodeToString("${basicAuth.username}:${basicAuth.password}".toByteArray())
-            builder.header("Authorization", authHeader)
-        }
-
-        (authentication as? BearerAuthentication)?.let { bearerAuth ->
-            builder.header("Authorization", "Bearer ${bearerAuth.bearerToken}")
-        }
+        requestConfigurer.configureRequest(builder, config)
 
         return builder
     }

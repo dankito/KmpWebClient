@@ -12,11 +12,10 @@ import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.dankito.web.client.auth.Authentication
+import net.dankito.web.client.KtorRequestConfigurer
 
 open class KtorWebSocket(
-    url: String,
-    authentication: Authentication? = null,
+    config: WebSocketConfig,
     httpClient: HttpClient,
     protected val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
 ) : WebSocketBase(), WebSocket {
@@ -26,15 +25,17 @@ open class KtorWebSocket(
 
     protected var isOpen = false // TODO: make thread safe
 
+    protected open val requestConfigurer: KtorRequestConfigurer = KtorRequestConfigurer.Default
+
 
     init {
-        initWebSocket(url, authentication, httpClient)
+        initWebSocket(config, httpClient)
     }
 
-    protected open fun initWebSocket(url: String, authentication: Authentication?, httpClient: HttpClient) {
+    protected open fun initWebSocket(config: WebSocketConfig, httpClient: HttpClient) {
         coroutineScope.launch {
-            session = httpClient.webSocketSession(url) {
-
+            session = httpClient.webSocketSession(config.url) {
+                requestConfigurer.configureRequest(this, config)
             }
 
             isOpen = true
