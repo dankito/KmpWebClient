@@ -51,8 +51,11 @@ open class KtorWebClient(
         defaultAccept: String = ContentTypes.JSON,
         serializer: Serializer = KotlinxJsonSerializer.Instance,
         enableBodyCompression: Boolean = false,
+        enableWebSocket: Boolean = false,
+        enableSSE: Boolean = false,
         customClientCreator: ((ClientConfig, HttpClientConfig<*>.() -> Unit) -> HttpClient)? = null,
-    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent, defaultContentType, defaultAccept, serializer, enableBodyCompression), customClientCreator)
+    ) : this(ClientConfig(baseUrl, authentication, ignoreCertificateErrors, customClientConfig, defaultUserAgent,
+        defaultContentType, defaultAccept, serializer, enableBodyCompression, enableWebSocket = enableWebSocket, enableSSE = enableSSE), customClientCreator)
 
 
     companion object {
