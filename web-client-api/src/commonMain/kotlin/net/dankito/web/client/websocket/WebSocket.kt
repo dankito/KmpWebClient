@@ -40,6 +40,10 @@ interface WebSocket {
     fun onClose(handler: (statusCode: Int, reason: String?) -> Unit)
 
 
+    suspend fun sendTextMessage(message: Any)
+
+    suspend fun sendBinaryMessage(message: ByteArray, last: Boolean = true)
+
     suspend fun close(code: Int = 1001, reason: String? = null)
 
 }

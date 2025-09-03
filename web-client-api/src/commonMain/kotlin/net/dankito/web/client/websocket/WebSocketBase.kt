@@ -8,6 +8,8 @@ abstract class WebSocketBase(
     protected val serializer: Serializer? = null,
 ) : WebSocket {
 
+    protected abstract suspend fun doSendTextMessage(message: String)
+
 
     protected val onTextMessageHandlers = mutableListOf<(String) -> Unit>() // TODO: make thread-safe
 
@@ -18,6 +20,20 @@ abstract class WebSocketBase(
     protected val onCloseHandlers = mutableListOf<(Int, String?) -> Unit>() // TODO: make thread-safe
 
     protected val log by logger()
+
+
+    override suspend fun sendTextMessage(message: Any) {
+        if (message !is String) {
+            if (serializer == null) { // will never occur for KtorWebSocket and JavaHttpClientWebSocket
+                log.error { "To send ${message::class} over WebSocket we need to serialize it to String, but no " +
+                        "Serializer has been set." }
+            } else {
+                doSendTextMessage(serializer.serialize(message))
+            }
+        } else {
+            doSendTextMessage(message)
+        }
+    }
 
 
     override fun onTextMessage(handler: (String) -> Unit) {

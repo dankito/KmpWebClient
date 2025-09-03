@@ -78,6 +78,14 @@ open class KtorWebSocket(
     }
 
 
+    override suspend fun doSendTextMessage(message: String) {
+        session.send(Frame.Text(message))
+    }
+
+    override suspend fun sendBinaryMessage(message: ByteArray, last: Boolean) {
+        session.send(Frame.Binary(last, message))
+    }
+
     override suspend fun close(code: Int, reason: String?) {
         session.close(CloseReason(code.toShort(), reason ?: ""))
     }

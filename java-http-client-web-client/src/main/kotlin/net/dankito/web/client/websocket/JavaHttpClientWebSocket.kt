@@ -70,6 +70,15 @@ open class JavaHttpClientWebSocket(
     }).join()
 
 
+    override suspend fun doSendTextMessage(message: String) {
+        webSocket.sendText(message, true).await()
+    }
+
+    override suspend fun sendBinaryMessage(message: ByteArray, last: Boolean) {
+        webSocket.sendBinary(ByteBuffer.wrap(message), last).await()
+    }
+
+
     override suspend fun close(code: Int, reason: String?) {
         // 1000 indicates a normal closure, meaning that the purpose for which the connection was established has been fulfilled.
         // 1001 indicates that an endpoint is "going away", such as a server going down or a browser having navigated away from a page.
