@@ -11,6 +11,7 @@ import net.dankito.web.client.JavaHttpClientRequestConfigurer
 import java.net.http.HttpClient
 import java.nio.ByteBuffer
 import java.util.concurrent.CompletionStage
+import java.util.concurrent.CopyOnWriteArrayList
 
 open class JavaHttpClientWebSocket(
     config: WebSocketConfig,
@@ -31,18 +32,18 @@ open class JavaHttpClientWebSocket(
 
 
     protected val webSocket = configureNewWebSocket(httpClient, config, clientConfig).buildAsync(requestConfigurer.buildUrl(config), object : java.net.http.WebSocket.Listener {
-        private val buffer = StringBuilder()
+        private val buffer = CopyOnWriteArrayList<CharSequence>() // do not use StringBuilder, it's not thread-safe
 
         override fun onText(webSocket: java.net.http.WebSocket, data: CharSequence, last: Boolean): CompletionStage<*>? {
             val future = coroutineScope.async {
                 if (last == false) { // partial message (large messages sometimes get broken into parts/chunks) -> add to buffer
-                    buffer.append(data)
+                    buffer.add(data)
                 } else {
                     if (buffer.isEmpty()) { // full message at once
                         handleTextMessage(data.toString())
                     } else { // last part of chunked message retrieved
-                        buffer.append(data)
-                        handleTextMessage(buffer.toString())
+                        buffer.add(data)
+                        handleTextMessage(buffer.joinToString(""))
                         buffer.clear()
                     }
                 }
