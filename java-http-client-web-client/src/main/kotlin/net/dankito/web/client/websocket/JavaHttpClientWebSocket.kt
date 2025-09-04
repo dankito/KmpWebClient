@@ -2,6 +2,7 @@ package net.dankito.web.client.websocket
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.coroutines.future.await
@@ -35,22 +36,26 @@ open class JavaHttpClientWebSocket(
         private val buffer = CopyOnWriteArrayList<CharSequence>() // do not use StringBuilder, it's not thread-safe
 
         override fun onText(webSocket: java.net.http.WebSocket, data: CharSequence, last: Boolean): CompletionStage<*>? {
-            val future = coroutineScope.async {
-                if (last == false) { // partial message (large messages sometimes get broken into parts/chunks) -> add to buffer
+            var job: Job? = null
+
+            if (last == false) { // partial message (large messages sometimes get broken into parts/chunks) -> add to buffer
+                buffer.add(data)
+            } else {
+                val message = if (buffer.isEmpty()) { // full message at once
+                    data.toString()
+                } else { // last part of chunked message retrieved
                     buffer.add(data)
-                } else {
-                    if (buffer.isEmpty()) { // full message at once
-                        handleTextMessage(data.toString())
-                    } else { // last part of chunked message retrieved
-                        buffer.add(data)
-                        handleTextMessage(buffer.joinToString(""))
-                        buffer.clear()
-                    }
+                    val joinedMessage = buffer.joinToString("")
+                    buffer.clear()
+                    joinedMessage
                 }
-            }.asCompletableFuture()
+
+                // get off WebSocket thread to not block it for further messages; but only the handleTextMessage(), not the buffer handling
+                job = coroutineScope.launch { handleTextMessage(message) }
+            }
 
             super.onText(webSocket, data, last)
-            return future
+            return job?.asCompletableFuture()
         }
 
         override fun onBinary(webSocket: java.net.http.WebSocket, data: ByteBuffer, last: Boolean): CompletionStage<*>? {
@@ -100,13 +105,6 @@ open class JavaHttpClientWebSocket(
         // 1000 indicates a normal closure, meaning that the purpose for which the connection was established has been fulfilled.
         // 1001 indicates that an endpoint is "going away", such as a server going down or a browser having navigated away from a page.
         webSocket.sendClose(code, reason ?: "").await() // null is not allowed for reason
-    }
-
-
-    override suspend fun handleTextMessage(message: String) {
-        coroutineScope.launch { // get off WebSocket thread to not block it for further messages
-            super.handleTextMessage(message)
-        }
     }
 
 
