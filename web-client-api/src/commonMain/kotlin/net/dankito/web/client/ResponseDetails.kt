@@ -63,6 +63,8 @@ open class ResponseDetails(
     open val contentLength: Long? by lazy { getHeaderValue("Content-Length")?.toLongOrNull() }
     open val charset: String? = null // TODO: extract Charset from Content-Type
 
+    open val redirectLocation: String? by lazy { getHeaderValue("Location") }
+
     open val linkHeader: List<LinkHeader>? by lazy {
         getHeaderValue("Link")?.let { LinkHeaderParser.Instance.parse(it) }
     }
