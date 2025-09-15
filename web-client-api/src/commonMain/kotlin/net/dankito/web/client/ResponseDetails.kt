@@ -19,10 +19,6 @@ open class ResponseDetails(
 
     headers: Map<String, List<String>> = emptyMap(),
     cookies: List<Cookie> = emptyList(),
-
-    contentType: String? = null,
-    contentLength: Long? = null,
-    charset: String? = null,
 ) {
 
     open val requestTime: Instant? = requestTime
@@ -47,11 +43,6 @@ open class ResponseDetails(
 
     open val cookies: List<Cookie> = cookies
 
-    // parsed headers:
-    open val contentType: String? = contentType
-    open val contentLength: Long? = contentLength
-    open val charset: String? = charset
-
 
     open fun getHeaderValue(headerName: String): String? {
         val headerNameLowerCased = headerName.lowercase() // header names are case insensitive, so compare them lower cased
@@ -66,6 +57,11 @@ open class ResponseDetails(
 
         return null
     }
+
+    // parsed headers:
+    open val contentType: String? by lazy { getHeaderValue("Content-Type") }
+    open val contentLength: Long? by lazy { getHeaderValue("Content-Length")?.toLongOrNull() }
+    open val charset: String? = null // TODO: extract Charset from Content-Type
 
     open val linkHeader: List<LinkHeader>? by lazy {
         getHeaderValue("Link")?.let { LinkHeaderParser.Instance.parse(it) }
