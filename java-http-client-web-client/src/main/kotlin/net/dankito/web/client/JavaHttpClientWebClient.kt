@@ -6,7 +6,6 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import net.codinux.log.logger
 import net.dankito.datetime.Instant
-import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.websocket.JavaHttpClientWebSocket
 import net.dankito.web.client.websocket.WebSocket
 import net.dankito.web.client.websocket.WebSocketConfig
@@ -24,7 +23,9 @@ open class JavaHttpClientWebClient(
     protected val log by logger()
 
     protected val client = HttpClient.newBuilder().apply {
-        followRedirects(HttpClient.Redirect.NORMAL)
+        if (config.followRedirects) {
+            followRedirects(HttpClient.Redirect.NORMAL)
+        }
 
         if (config.ignoreCertificateErrors) {
             sslContext(SslSettings.trustAllCertificatesSslContext)

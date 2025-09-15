@@ -17,6 +17,8 @@ open class ClientConfig(
     open val defaultContentType: String = ContentTypes.JSON,
     open val defaultAccept: String = ContentTypes.JSON,
 
+    open val followRedirects: Boolean = true,
+
     open val dispatcher: CoroutineDispatcher? = null,
 
     // for now use kotlinx-serialization so that JavaHttpClientWebClient can be used as a plug-in replacement for KtorWebClient
