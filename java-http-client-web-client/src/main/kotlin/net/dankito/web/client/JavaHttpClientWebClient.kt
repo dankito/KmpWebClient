@@ -141,7 +141,7 @@ open class JavaHttpClientWebClient(
                                else response.body() as? String
             val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
 
-            if (config.logErroneousResponses) {
+            if (config.logErroneousResponses && statusCode >= 400) { // don't log redirect responses
                 log.info { "Erroneous response retrieved from $method $url: $statusCode $reasonPhrase. Body:\n${responseBody?.take(250)}" +
                             if (responseBody != null && responseBody.length > 250) "..." else "" }
             }
