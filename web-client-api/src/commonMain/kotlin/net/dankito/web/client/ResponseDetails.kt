@@ -19,6 +19,11 @@ open class ResponseDetails(
 
     headers: Map<String, List<String>> = emptyMap(),
     cookies: List<Cookie> = emptyList(),
+
+    // TODO: can be removed now, are just here to keep binary compatiblity
+    contentType: String? = null,
+    contentLength: Long? = null,
+    charset: String? = null,
 ) {
 
     open val requestTime: Instant? = requestTime
@@ -59,9 +64,9 @@ open class ResponseDetails(
     }
 
     // parsed headers:
-    open val contentType: String? by lazy { getHeaderValue("Content-Type") }
-    open val contentLength: Long? by lazy { getHeaderValue("Content-Length")?.toLongOrNull() }
-    open val charset: String? = null // TODO: extract Charset from Content-Type
+    open val contentType: String? by lazy { contentType ?: getHeaderValue("Content-Type") }
+    open val contentLength: Long? by lazy { contentLength ?: getHeaderValue("Content-Length")?.toLongOrNull() }
+    open val charset: String? = charset // TODO: extract Charset from Content-Type
 
     open val redirectLocation: String? by lazy { getHeaderValue("Location") }
 
