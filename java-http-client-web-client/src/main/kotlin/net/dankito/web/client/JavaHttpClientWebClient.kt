@@ -120,10 +120,7 @@ open class JavaHttpClientWebClient(
         val url = response.uri().toString()
         val statusCode = response.statusCode()
         val reasonPhrase = HttpStatus.getReasonPhrase(statusCode) ?: ""
-        val responseDetails = ResponseDetails(method, parameters, statusCode, reasonPhrase, requestTime, Instant.now(), response.version().toString(),
-            response.headers().map(), emptyList(), // TODO: map cookies
-            response.headers().firstValue("Content-Type").orElse(null), response.headers().firstValue("Content-Length").orElse(null)?.toLongOrNull() // TODO: extract Charset from Content-Type
-        )
+        val responseDetails = JavaHttpClientResponseDetails(method, parameters, requestTime, response, statusCode, reasonPhrase)
 
         return if (statusCode in 200..299) {
             try {
