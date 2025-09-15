@@ -137,7 +137,8 @@ open class JavaHttpClientWebClient(
                     WebClientException(e.message, e, responseDetails, response.body() as? String))
             }
         } else {
-            val responseBody = response.body() as? String
+            val responseBody = if (response.body() is ByteArray) (response.body() as ByteArray).decodeToString()
+                               else response.body() as? String
             val errorType = if (responseDetails.isServerErrorResponse) ClientErrorType.ServerError else ClientErrorType.ClientError
 
             if (config.logErroneousResponses) {
