@@ -71,21 +71,8 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
 
     // made function inline so that also suspendable function can be called in mapper lambda
     inline fun <R> mapBodyWithResponseOnSuccess(mapper: (WebClientResult<T>, T) -> R): WebClientResult<R> =
-        if (successful && body != null) {
-            try {
-                copyWithBody(mapper(this, body!!))
-            } catch (e: Throwable) {
-                var bodyAsString = body?.toString() ?: "null" // real long bodies crash console and Loki pusher, so give it a max length
-                if (bodyAsString.length > 750) {
-                    bodyAsString = bodyAsString.take(746) + " ..."
-                }
-                Log.error(e) { "Could not map response body: $bodyAsString." }
-                WebClientResult(this.requestedUrl, false, this.responseDetails, ClientErrorType.MappingError,
-                    WebClientException("Response body '$bodyAsString' could not be mapped", e, this.responseDetails))
-            }
-        } else {
-            @Suppress("UNCHECKED_CAST")
-            this as WebClientResult<R>
+        mapBodyOnSuccess { body ->
+            mapper(this, body)
         }
 
     // TODO: add method for error case
