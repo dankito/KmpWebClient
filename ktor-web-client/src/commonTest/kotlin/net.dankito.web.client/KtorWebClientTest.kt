@@ -152,6 +152,16 @@ class KtorWebClientTest {
     }
 
 
+    @Test
+    fun flatMapBodyOnSuccess() = runTest {
+        val response = underTest.head(Url).flatMapBodyOnSuccess {
+            underTest.get<String>(Url)
+        }
+
+        assertSuccessGetOrDeleteResponse(response)
+    }
+
+
     private fun assertNoContentResponse(response: WebClientResult<Unit>) {
         assertThat(response::successful).isTrue()
         assertThat(response::statusCode).isEqualTo(204)

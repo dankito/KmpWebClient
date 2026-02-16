@@ -117,6 +117,16 @@ class JavaHttpClientWebClientTest {
 
 
     @Test
+    fun flatMapBodyOnSuccess() = runTest {
+        val response = underTest.head(Url).flatMapBodyOnSuccess {
+            underTest.get<String>(Url)
+        }
+
+        assertSuccessGetOrDeleteResponse(response)
+    }
+
+
+    @Test
     fun downloadBinaryFileAsByteArray() = runTest {
         val url = "https://github.com/iplocate/ip-address-databases/raw/refs/heads/main/ip-to-country/ip-to-country.csv.zip?download=true"
 

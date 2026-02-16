@@ -52,10 +52,27 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
 
     // made function inline so that also suspendable function can be called in mapper lambda
     inline fun <R> mapBodyOnSuccess(mapper: (T) -> R): WebClientResult<R> =
+        mapOnSuccess { body ->
+            copyWithBody(mapper(body))
+        }
+
+    // made function inline so that also suspendable function can be called in mapper lambda
+    inline fun <R> mapBodyWithResponseOnSuccess(mapper: (WebClientResult<T>, T) -> R): WebClientResult<R> =
+        mapBodyOnSuccess { body ->
+            mapper(this, body)
+        }
+
+     inline fun <R> flatMapBodyOnSuccess(mapper: (T) -> WebClientResult<R>): WebClientResult<R> =
+         mapOnSuccess { body ->
+             mapper(body)
+         }
+
+    // made function inline so that also suspendable function can be called in mapper lambda
+    inline fun <R> mapOnSuccess(mapper: (T) -> WebClientResult<R>): WebClientResult<R> =
         @Suppress("UNCHECKED_CAST")
         if (successful && body != null) {
             try {
-                copyWithBody(mapper(body!!))
+                mapper(body!!)
             } catch (e: Throwable) {
                 var bodyAsString = body?.toString() ?: "null" // real long bodies crash console and Loki pusher, so give it a max length
                 if (bodyAsString.length > 750) {
@@ -67,12 +84,6 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
             }
         } else {
             this as WebClientResult<R>
-        }
-
-    // made function inline so that also suspendable function can be called in mapper lambda
-    inline fun <R> mapBodyWithResponseOnSuccess(mapper: (WebClientResult<T>, T) -> R): WebClientResult<R> =
-        mapBodyOnSuccess { body ->
-            mapper(this, body)
         }
 
     // TODO: add method for error case
