@@ -15,6 +15,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.*
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.InternalSerializationApi
 import net.codinux.log.logger
 import net.dankito.web.client.auth.*
@@ -249,9 +250,9 @@ open class KtorWebClient(
         } else if (responseClass == ByteArray::class) {
             val bytes: ByteArray = clientResponse.body()
             bytes as T
+        } else if (responseClass == ByteReadChannel::class) {
+            clientResponse.bodyAsChannel() as T
         } else {
-            // TODO: add cache for Serializers
-            // TODO: stream response (at least on JVM)
             (parameters.serializer ?: config.serializer).deserialize(clientResponse.bodyAsText(),
                 responseClass, parameters.responseGenericType1, parameters.responseGenericType2)
         }
