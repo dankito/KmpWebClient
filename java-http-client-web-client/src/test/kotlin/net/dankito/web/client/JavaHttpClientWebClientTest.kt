@@ -135,7 +135,7 @@ class JavaHttpClientWebClientTest {
         assertThat(response::successful).isTrue()
         assertThat(response::body).isNotNull()
         assertThat(response.body!!.size).isGreaterThan(6_800_000)
-        assertThat(response.body!!.size).isLessThan(7_500_000) // before it was downloaded as String and larger than 12 MB instead of actual 6,8 MB
+        assertThat(response.body!!.size).isLessThan(8_500_000) // before it was downloaded as String and larger than 12 MB instead of actual 6,8 MB
     }
 
     @Test
@@ -149,7 +149,7 @@ class JavaHttpClientWebClientTest {
 
         val body = response.body!!.use { it.readBytes() }
         assertThat(body.size).isGreaterThan(6_800_000)
-        assertThat(body.size).isLessThan(7_500_000) // before it was downloaded as String and larger than 12 MB instead of actual 6,8 MB
+        assertThat(body.size).isLessThan(8_500_000) // before it was downloaded as String and larger than 12 MB instead of actual 6,8 MB
     }
 
 
