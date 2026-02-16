@@ -7,7 +7,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
-import net.dankito.web.client.ClientConfig
+import net.dankito.web.client.JavaHttpClientWebClientConfig
 import net.dankito.web.client.JavaHttpClientRequestConfigurer
 import java.net.http.HttpClient
 import java.nio.ByteBuffer
@@ -17,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 open class JavaHttpClientWebSocket(
     config: WebSocketConfig,
     httpClient: HttpClient = defaultHttpClient(),
-    clientConfig: ClientConfig,
+    clientConfig: JavaHttpClientWebClientConfig,
 ) : WebSocketBase(clientConfig.serializer), WebSocket {
 
     companion object {
@@ -108,7 +108,7 @@ open class JavaHttpClientWebSocket(
     }
 
 
-    protected open fun configureNewWebSocket(httpClient: HttpClient, config: WebSocketConfig, clientConfig: ClientConfig): java.net.http.WebSocket.Builder {
+    protected open fun configureNewWebSocket(httpClient: HttpClient, config: WebSocketConfig, clientConfig: JavaHttpClientWebClientConfig): java.net.http.WebSocket.Builder {
         val finalConfig = mergeConfig(config, clientConfig)
         val builder = httpClient.newWebSocketBuilder()
 
@@ -117,7 +117,7 @@ open class JavaHttpClientWebSocket(
         return builder
     }
 
-    protected open fun mergeConfig(config: WebSocketConfig, clientConfig: ClientConfig) = WebSocketConfig(
+    protected open fun mergeConfig(config: WebSocketConfig, clientConfig: JavaHttpClientWebClientConfig) = WebSocketConfig(
         config.url, config.queryParameters, config.headers,
         config.userAgent ?: clientConfig.defaultUserAgent,
         config.authentication ?: clientConfig.authentication,

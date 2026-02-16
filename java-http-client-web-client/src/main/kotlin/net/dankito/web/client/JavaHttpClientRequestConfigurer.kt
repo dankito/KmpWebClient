@@ -20,7 +20,7 @@ open class JavaHttpClientRequestConfigurer {
     }
 
 
-    open fun <T : Any> configureRequest(requestBuilder: HttpRequest.Builder, method: String, parameters: RequestParameters<T>, config: ClientConfig): HttpRequest.Builder = requestBuilder.apply {
+    open fun <T : Any> configureRequest(requestBuilder: HttpRequest.Builder, method: String, parameters: RequestParameters<T>, config: JavaHttpClientWebClientConfig): HttpRequest.Builder = requestBuilder.apply {
         uri(URI(buildUrl(config.baseUrl, parameters)))
 
         parameters.requestTimeoutMillis?.let { timeout(Duration.ofMillis(it)) }
@@ -97,7 +97,7 @@ open class JavaHttpClientRequestConfigurer {
     }
 
 
-    protected open fun <T : Any> getRequestBody(parameters: RequestParameters<T>, config: ClientConfig): HttpRequest.BodyPublisher {
+    protected open fun <T : Any> getRequestBody(parameters: RequestParameters<T>, config: JavaHttpClientWebClientConfig): HttpRequest.BodyPublisher {
         val body = parameters.body
 
         return if (body == null) {

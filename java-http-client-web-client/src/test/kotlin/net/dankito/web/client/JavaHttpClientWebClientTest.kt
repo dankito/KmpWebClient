@@ -15,7 +15,7 @@ class JavaHttpClientWebClientTest {
     }
 
 
-    private val underTest = JavaHttpClientWebClient(ClientConfig(ignoreCertificateErrors = true))
+    private val underTest = JavaHttpClientWebClient(JavaHttpClientWebClientConfig(ignoreCertificateErrors = true))
 
 
     @Test

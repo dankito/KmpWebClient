@@ -17,7 +17,7 @@ import java.time.Duration
 
 @Suppress("UNCHECKED_CAST")
 open class JavaHttpClientWebClient(
-    protected val config: ClientConfig = ClientConfig(),
+    protected val config: JavaHttpClientWebClientConfig = JavaHttpClientWebClientConfig(),
 ) : WebClient {
 
     protected val log by logger()

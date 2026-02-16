@@ -5,7 +5,7 @@ import net.dankito.web.client.auth.Authentication
 import net.dankito.web.client.serialization.KotlinxJsonSerializer
 import net.dankito.web.client.serialization.Serializer
 
-open class ClientConfig(
+open class JavaHttpClientWebClientConfig( // don't name it ClientConfig due to naming conflict with KtorWebClient's ClientConfig
     open val baseUrl: String? = null,
     open val authentication: Authentication? = null,
 
