@@ -74,13 +74,7 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
             try {
                 mapper(body!!)
             } catch (e: Throwable) {
-                var bodyAsString = body?.toString() ?: "null" // real long bodies crash console and Loki pusher, so give it a max length
-                if (bodyAsString.length > 750) {
-                    bodyAsString = bodyAsString.take(746) + " ..."
-                }
-                Log.error(e) { "Could not map response body: $bodyAsString." }
-                WebClientResult(this.requestedUrl, false, this.responseDetails, ClientErrorType.MappingError,
-                    WebClientException("Response body '$bodyAsString' could not be mapped", e, this.responseDetails))
+                mappingBodyFailed(e)
             }
         } else {
             this as WebClientResult<R>
@@ -102,9 +96,34 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
         return this
     }
 
+    @ExperimentalMultiplatform
+    inline fun <R> mapBodyOnError(mapper: (WebClientResult<T>) -> R): WebClientResult<R> =
+        @Suppress("UNCHECKED_CAST")
+        if (successful) {
+            this as WebClientResult<R>
+        } else {
+            try {
+                copyWithBody(mapper(this))
+            } catch (e: Throwable) {
+                mappingBodyFailed(e)
+            }
+        }
+
 
     open fun <K> copyWithBody(body: K) =
         WebClientResult(this.requestedUrl, this.successful, this.responseDetails, this.errorType, this.error, body)
+
+    open fun <R> mappingBodyFailed(e: Throwable): WebClientResult<R> {
+        var bodyAsString = body?.toString() ?: "<null>" // real long bodies crash console and Loki pusher, so give it a max length
+        if (bodyAsString.length > 750) {
+            bodyAsString = bodyAsString.take(746) + " ..."
+        }
+
+        Log.error(e) { "Could not map response body: $bodyAsString." }
+
+        return WebClientResult(this.requestedUrl, false, this.responseDetails, ClientErrorType.MappingError,
+            WebClientException("Response body '$bodyAsString' could not be mapped", e, this.responseDetails))
+    }
 
 
     override fun toString(): String {
