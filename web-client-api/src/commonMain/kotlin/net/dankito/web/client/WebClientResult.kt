@@ -50,6 +50,15 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
 
     open val successfulAndBodySet: Boolean = successful && body != null
 
+
+    inline fun onSuccess(action: (T) -> Unit): WebClientResult<T> {
+        if (successful && body != null) {
+            action(body!!)
+        }
+
+        return this
+    }
+
     // made function inline so that also suspendable function can be called in mapper lambda
     inline fun <R> mapBodyOnSuccess(mapper: (T) -> R): WebClientResult<R> =
         mapOnSuccess { body ->
