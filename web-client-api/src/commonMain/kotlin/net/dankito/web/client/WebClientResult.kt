@@ -95,6 +95,14 @@ open class WebClientResult<T>( // TODO: rename to Response or HttpResponse?
     inline fun <R> mapResponseBodyIfSuccessful(mapper: (WebClientResult<T>, T) -> R) = mapBodyWithResponseOnSuccess(mapper)
 
 
+    inline fun onError(action: (WebClientResult<T>) -> Unit): WebClientResult<T> {
+        if (successful == false) {
+            action(this)
+        }
+        return this
+    }
+
+
     open fun <K> copyWithBody(body: K) =
         WebClientResult(this.requestedUrl, this.successful, this.responseDetails, this.errorType, this.error, body)
 
