@@ -18,28 +18,32 @@ import java.time.Duration
 @Suppress("UNCHECKED_CAST")
 open class JavaHttpClientWebClient(
     protected open val config: JavaHttpClientWebClientConfig = JavaHttpClientWebClientConfig(),
+    protected open val client: HttpClient = buildDefaultHttpClient(config),
     protected open val requestConfigurer: JavaHttpClientRequestConfigurer = JavaHttpClientRequestConfigurer.Default
 ) : WebClient {
 
+    companion object {
+        fun buildDefaultHttpClient(config: JavaHttpClientWebClientConfig): HttpClient = HttpClient.newBuilder().apply {
+            if (config.followRedirects) {
+                followRedirects(HttpClient.Redirect.NORMAL)
+            }
+
+            if (config.ignoreCertificateErrors) {
+                sslContext(SslSettings.trustAllCertificatesSslContext)
+            }
+
+            config.connectTimeoutMillis?.let {
+                connectTimeout(Duration.ofMillis(it))
+            }
+
+            config.dispatcher?.let { dispatcher ->
+                executor(dispatcher.asExecutor())
+            }
+        }.build()
+    }
+
+
     protected val log by logger()
-
-    protected val client = HttpClient.newBuilder().apply {
-        if (config.followRedirects) {
-            followRedirects(HttpClient.Redirect.NORMAL)
-        }
-
-        if (config.ignoreCertificateErrors) {
-            sslContext(SslSettings.trustAllCertificatesSslContext)
-        }
-
-        config.connectTimeoutMillis?.let {
-            connectTimeout(Duration.ofMillis(it))
-        }
-
-        config.dispatcher?.let { dispatcher ->
-            executor(dispatcher.asExecutor())
-        }
-    }.build()
 
     protected val requestBuilder = HttpRequest
         .newBuilder()
