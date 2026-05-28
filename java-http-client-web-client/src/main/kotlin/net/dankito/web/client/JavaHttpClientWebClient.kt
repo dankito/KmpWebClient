@@ -17,7 +17,8 @@ import java.time.Duration
 
 @Suppress("UNCHECKED_CAST")
 open class JavaHttpClientWebClient(
-    protected val config: JavaHttpClientWebClientConfig = JavaHttpClientWebClientConfig(),
+    protected open val config: JavaHttpClientWebClientConfig = JavaHttpClientWebClientConfig(),
+    protected open val requestConfigurer: JavaHttpClientRequestConfigurer = JavaHttpClientRequestConfigurer.Default
 ) : WebClient {
 
     protected val log by logger()
@@ -39,8 +40,6 @@ open class JavaHttpClientWebClient(
             executor(dispatcher.asExecutor())
         }
     }.build()
-
-    protected open val requestConfigurer: JavaHttpClientRequestConfigurer = JavaHttpClientRequestConfigurer.Default
 
     protected val requestBuilder = HttpRequest
         .newBuilder()
