@@ -19,7 +19,8 @@ import java.time.Duration
 open class JavaHttpClientWebClient(
     protected open val config: JavaHttpClientWebClientConfig = JavaHttpClientWebClientConfig(),
     protected open val client: HttpClient = buildDefaultHttpClient(config),
-    protected open val requestConfigurer: JavaHttpClientRequestConfigurer = JavaHttpClientRequestConfigurer.Default
+    protected open val requestConfigurer: JavaHttpClientRequestConfigurer = JavaHttpClientRequestConfigurer.Default,
+    protected open val requestBuilder: HttpRequest.Builder = buildDefaultRequestBuilder(config, requestConfigurer)
 ) : WebClient {
 
     companion object {
@@ -40,31 +41,31 @@ open class JavaHttpClientWebClient(
                 executor(dispatcher.asExecutor())
             }
         }.build()
+
+        fun buildDefaultRequestBuilder(config: JavaHttpClientWebClientConfig, requestConfigurer: JavaHttpClientRequestConfigurer): HttpRequest.Builder = HttpRequest
+            .newBuilder()
+            .apply {
+                config.defaultUserAgent?.let { header("User-Agent", it) }
+
+                header("Content-Type", config.defaultContentType)
+                header("Accept", config.defaultAccept)
+
+                requestConfigurer.createAuthorizationHeaderValue(config.authentication)?.let {
+                    header("Authorization", it)
+                }
+
+                config.requestTimeoutMillis?.let {
+                    timeout(Duration.ofMillis(it))
+                }
+
+                if (config.enableBodyCompression) {
+                    // TODO
+                }
+            }
     }
 
 
     protected val log by logger()
-
-    protected val requestBuilder = HttpRequest
-        .newBuilder()
-        .apply {
-            config.defaultUserAgent?.let { header("User-Agent", it) }
-
-            header("Content-Type", config.defaultContentType)
-            header("Accept", config.defaultAccept)
-
-            requestConfigurer.createAuthorizationHeaderValue(config.authentication)?.let {
-                header("Authorization", it)
-            }
-
-            config.requestTimeoutMillis?.let {
-                timeout(Duration.ofMillis(it))
-            }
-
-            if (config.enableBodyCompression) {
-                // TODO
-            }
-        }
 
 
     override suspend fun webSocket(config: WebSocketConfig): WebSocket =
