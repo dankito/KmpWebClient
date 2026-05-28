@@ -8,15 +8,20 @@ import net.codinux.log.logger
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
-open class JacksonJsonSerializer : Serializer {
+open class JacksonJsonSerializer(
+    protected val objectMapper: ObjectMapper = buildDefaultObjectMapper()
+) : Serializer {
 
-    protected val objectMapper = ObjectMapper().apply {
-        findAndRegisterModules()
+    companion object {
+        fun buildDefaultObjectMapper(): ObjectMapper = ObjectMapper().apply {
+            findAndRegisterModules()
 
-        disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
-        setDefaultPrettyPrinter(CustomPrettyPrinter())
+            setDefaultPrettyPrinter(CustomPrettyPrinter())
+        }
     }
+
 
     protected val typeFactory = objectMapper.typeFactory
 
