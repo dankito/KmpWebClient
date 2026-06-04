@@ -2,8 +2,12 @@ package net.dankito.web.client
 
 import kotlinx.coroutines.CoroutineDispatcher
 import net.dankito.web.client.auth.Authentication
+import net.dankito.web.client.header.CookieHeaderParser
 import net.dankito.web.client.serialization.KotlinxJsonSerializer
 import net.dankito.web.client.serialization.Serializer
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 open class JavaHttpClientWebClientConfig( // don't name it ClientConfig due to naming conflict with KtorWebClient's ClientConfig
     open val baseUrl: String? = null,
@@ -35,6 +39,14 @@ open class JavaHttpClientWebClientConfig( // don't name it ClientConfig due to n
     open val logSuccessfulResponses: Boolean = false,
 
     open val logErroneousResponses: Boolean = false,
+
+    open val cookieHeaderParser: CookieHeaderParser = CookieHeaderParser { httpDate -> runCatching {
+        OffsetDateTime.parse(httpDate, HttpDateFormat).toInstant().toEpochMilli()
+    }.getOrNull() },
 ) {
+    companion object {
+        val HttpDateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
+    }
+
     override fun toString() = "baseUrl = $baseUrl, authentication = $authentication, ignoreCertificateErrors = $ignoreCertificateErrors"
 }

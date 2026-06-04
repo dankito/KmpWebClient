@@ -124,7 +124,8 @@ open class JavaHttpClientWebClient(
         val url = response.uri().toString()
         val statusCode = response.statusCode()
         val reasonPhrase = HttpStatus.getReasonPhrase(statusCode) ?: ""
-        val responseDetails = JavaHttpClientResponseDetails(method, parameters, requestTime, response, statusCode, reasonPhrase)
+        val cookies = response.headers().allValues("Set-Cookie").mapNotNull { config.cookieHeaderParser.parseSetCookie(it) }
+        val responseDetails = JavaHttpClientResponseDetails(method, parameters, requestTime, response, statusCode, reasonPhrase, cookies)
 
         return if (statusCode in 200..299) {
             try {

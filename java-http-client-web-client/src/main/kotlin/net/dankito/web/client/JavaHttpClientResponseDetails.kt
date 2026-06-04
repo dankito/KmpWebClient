@@ -10,7 +10,8 @@ open class JavaHttpClientResponseDetails(
     val response: HttpResponse<*>,
     statusCode: Int,
     reasonPhrase: String,
+    cookies: List<Cookie> = emptyList(),
 ) : ResponseDetails(method, parameters,
     statusCode, reasonPhrase, requestTime, Instant.now(), response.version().toString(),
-    response.headers().map(), emptyList(), // TODO: map cookies
+    response.headers().map(), cookies,
 )
