@@ -103,7 +103,11 @@ open class JavaHttpClientRequestConfigurer {
         return if (body == null) {
             HttpRequest.BodyPublishers.noBody()
         } else {
-            val bodyAsString = if (body is String) body else (parameters.serializer ?: config.serializer).serialize(body)
+            val bodyAsString = if (body is String) {
+                body
+            } else {
+                (parameters.serializer ?: config.serializer).serialize(body)
+            }
 
             if (parameters.compressBodyIfSupported) {
                 // TODO
