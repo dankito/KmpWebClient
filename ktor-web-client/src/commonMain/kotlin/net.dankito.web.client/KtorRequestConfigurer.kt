@@ -42,10 +42,16 @@ open class KtorRequestConfigurer {
             parameters.requestTimeoutMillis?.let { requestTimeoutMillis = it }
         }
 
-        parameters.body?.let {
+        parameters.body?.let { body ->
             contentType((parameters.contentType ?: config.defaultContentType).let { ContentType.parse(it) })
 
-            setBody(it)
+            val bodyAsString = if (body is String) {
+                body
+            } else {
+                val serializer = parameters.serializer ?: config.serializer
+                serializer.serialize(body)
+            }
+            setBody(bodyAsString)
         }
     }
 
