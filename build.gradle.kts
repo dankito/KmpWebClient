@@ -9,7 +9,7 @@ buildscript {
 
 allprojects {
     group = "net.dankito.web"
-    version = "1.9.0-SNAPSHOT"
+    version = "1.9.0"
 
 
     ext["sourceCodeRepositoryBaseUrl"] = "github.com/dankito/KmpWebClient"
