@@ -45,7 +45,7 @@ open class JacksonJsonSerializer(
 
             objectMapper.readValue(serializedObject, javaType)
         } catch (e: Throwable) {
-            log.error(e) { "Could not map JSON to $typeClass:\n$${prettyPrint(serializedObject)}" }
+            log.error(e) { "Could not map JSON to $typeClass:\n$${prettyPrint(serializedObject).take(500)}" }
             throw e
         }
 

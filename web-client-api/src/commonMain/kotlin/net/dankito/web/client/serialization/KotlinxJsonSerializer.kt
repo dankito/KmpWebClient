@@ -49,7 +49,7 @@ open class KotlinxJsonSerializer : Serializer {
 
             this.json.decodeFromString(serializer, serializedObject)
         } catch (e: Throwable) {
-            log.error(e) { "Could not map JSON to $typeClass:\n${prettyPrint(serializedObject)}" }
+            log.error(e) { "Could not map JSON to $typeClass:\n${prettyPrint(serializedObject).take(500)}" }
             throw e
         }
 
